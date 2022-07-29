@@ -6,11 +6,23 @@ import './footer.css';
 
 function Footer() {
   return (
-    <Container fluid className='footer position-absolute bottom-0'>
-      <Row>
-        <Col>Footer column 1</Col>
-        <Col>Footer column 2</Col>
-        <Col>Footer column 3</Col>
+    <Container fluid className='text-bg-dark position-absolute bottom-0'>
+      <Row className='p-3'>
+        <Col className='m-1 border border-light'>
+          <p>Footer Section 1</p>
+          <p>Footer Section 1</p>
+          <p>Footer Section 1</p>
+        </Col>
+        <Col className='m-1 border border-light'>
+          <p>Footer Section 2</p>
+          <p>Footer Section 2</p>
+          <p>Footer Section 2</p>
+        </Col>
+        <Col className='m-1 border border-light'>
+          <p>Footer Section 3</p>
+          <p>Footer Section 3</p>
+          <p>Footer Section 3</p>
+        </Col>
       </Row>
     </Container>
   );

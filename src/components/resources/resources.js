@@ -9,7 +9,7 @@ function Resources() {
   let resources = mockResources;
 
   return (
-    <Container>
+    <Container className='pt-2'>
       <h2>Resources</h2>
       <Row>
         {resources.map(r => (

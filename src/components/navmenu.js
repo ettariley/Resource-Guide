@@ -5,7 +5,7 @@ import Navbar from 'react-bootstrap/Navbar';
 
 function NavMenu() {
   return (
-    <Navbar bg="light" expand="lg">
+    <Navbar variant="dark" bg='dark' expand="lg">
       <Container>
         <Navbar.Brand href="/">Hamblen Resource Guide</Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
