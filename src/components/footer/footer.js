@@ -2,26 +2,42 @@ import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
+import { NavLink } from 'react-router-dom';
 import './footer.css';
 
 function Footer() {
   return (
-    <Container fluid className='text-bg-dark position-absolute bottom-0'>
-      <Row className='p-3'>
-        <Col className='m-1 border border-light'>
-          <p>Footer Section 1</p>
-          <p>Footer Section 1</p>
-          <p>Footer Section 1</p>
+    <Container fluid className='text-bg-dark bg-secondary'>
+      <Row className='p-3 justify-content-around'>
+        <Col sm md='3' className='m-1 me-2'>
+          <h4>Hamblen Resource Guide</h4>
+          <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</p>
         </Col>
-        <Col className='m-1 border border-light'>
-          <p>Footer Section 2</p>
-          <p>Footer Section 2</p>
-          <p>Footer Section 2</p>
+        <Col sm md='3' className='m-1'>
+          <h4>Contact Us</h4>
+          <Row>
+            <a
+              href="mailto:ettahaselden@gmail.com"
+              title="Email"
+              target="_blank"
+            >
+              ettahaselden@gmail.com
+            </a>
+          </Row>
+          <Row>
+            <a href="tel:423-438-7569" title="Call">
+              423-438-7569
+            </a>
+          </Row>
+          <Row>
+            <p>Address Line 1<br></br>Address Line 2</p>
+          </Row>
         </Col>
-        <Col className='m-1 border border-light'>
-          <p>Footer Section 3</p>
-          <p>Footer Section 3</p>
-          <p>Footer Section 3</p>
+        <Col sm md='3' className='m-1 ms-2'>
+          <h4>Site Menu</h4>
+          <Row><NavLink to='/'>Resources</NavLink></Row>
+          <Row><NavLink to='/events'>Events</NavLink></Row>
+          <Row><NavLink to='/about'>About</NavLink></Row>
         </Col>
       </Row>
     </Container>
