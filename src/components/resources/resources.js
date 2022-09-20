@@ -28,11 +28,15 @@ function Resources() {
         <Row>
           <Col>
             <h4>Featured Programs & Announcements</h4>
-            <p>Featured program and announcement information goes here.</p>
+            <div className='bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3'>
+              <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.</p>
+            </div>
           </Col>
         </Row>
-        <Row>
-          <h4>Search & Filter</h4>
+        <Row className='mt-3 mb-3'>
+          <Col sm='auto'>
+            <h5 className='mt-2'>Search & Filter: </h5>
+          </Col>
           {/* text search feature */}
           <Col>
             <Form.Control
@@ -42,7 +46,7 @@ function Resources() {
             />
           </Col>
           {/* Program filter */}
-          <Col>
+          <Col sm='auto'>
             <DropdownButton variant='secondary' id='program-filter-dropdown' title='Programs'>
               {programFilters.map(p => (
                 <Dropdown.Item href='#/action'>{p}</Dropdown.Item>
@@ -50,7 +54,7 @@ function Resources() {
             </DropdownButton>
           </Col>
           {/* Population filter */}
-          <Col>
+          <Col sm='auto'>
             <DropdownButton variant='secondary' id='population-filter-dropdown' title='Populations'>
               {populationFilters.map(f => (
                 <Dropdown.Item href='#/action'>{f}</Dropdown.Item>
@@ -59,8 +63,7 @@ function Resources() {
           </Col>
         </Row>
         {/* Resource List */}
-        <Row className='pt-2'>
-          <h4>Resource List</h4>
+        <Row className='mt-2 pt-2'>
           {resources.map(r => (
             <Col>
               <ResourceCard resource={r} />
