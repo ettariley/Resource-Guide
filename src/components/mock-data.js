@@ -75,10 +75,13 @@ const mockFeaturedEvents = [
 // Need to finalize with Ashley
 const mockAboutText = [
   {
-    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    text: 'The Hamblen Resource Guide was created to provide an accessible, web-based approach when searching for resources and social services in Hamblen County. The original resource guide, or “Hi-C” brochure, has been an amazing tool for businesses, churches, and other organizations when they are searching for specific resources, whether for themselves or another person in need. Based on that success, the Ready by 6 Council and Morristown-Hamblen Central Services (Hi-C) made the decision to design a progressive web-based app, the Hamblen Resource Guide. Not only does this digital guide allow for a more efficient way to keep resources updated, but it can also reach a larger audience than the previously printed guide. Further, the Hamblen Resource Guide delivers a much more environmentally friendly option, while being a fiscally responsible way of informing the community of the resources available to them.',
   },
   {
-    text: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+    text: "The Ready by 6 Council is made up of area service non-profits and meets monthly. The group was formed to engage the Morristown Hamblen community in strengthening systems to ensure delivery of appropriate services that promote the development and well-being of prenatal to five-year old children and their families. Morristown-Hamblen Central Services is a long-standing community non-profit that provides supportive services to anyone living or working in Hamblen County. Both of these entities understand the importance of strong partnerships among social services, therefore, strengthening the community's connection to accurate resources quickly became a vital mission for both groups.",
+  },
+  {
+    text: 'The Hamblen Interagency Coalition (Hi-C) continues to meet monthly at Central Services for the purpose of networking and sharing current program and service information. Meetings are the last Thursday of the month at noon in the Wallace Room of Central Services (no meeting in Nov. or Dec.).',
   },
 ];
 
@@ -116,12 +119,7 @@ const mockServiceFilters = [
 ];
 
 // Filled out, probably all but need to check
-const mockPopulationFilters = [
-  'Children',
-  'Adults',
-  'Seniors',
-  'Veterans',
-];
+const mockPopulationFilters = ['Children', 'Adults', 'Seniors', 'Veterans'];
 
 export {
   mockResources,
