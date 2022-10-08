@@ -15,7 +15,7 @@ function Events() {
 
   return (
     <Fade in={open}>
-      <Container className='events'>
+      <Container className="events">
         <h2>Events</h2>
         <Row>
           <Col>This is the events page.</Col>
