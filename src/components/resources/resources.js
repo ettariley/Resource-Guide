@@ -119,19 +119,21 @@ function Resources() {
         </Row>
         {/* Show selected filters */}
         <Row>
-          <Col>
             {(progFilter !== '') ? (
-              <Button variant='outline-light' className='m-1' onClick={(e) => setProgFilter('')}>{progFilter} | X</Button>
+              <Col xs='auto' className='pb-2'>
+                <Button variant='outline-light' onClick={(e) => setProgFilter('')}>{progFilter} | X</Button>
+              </Col>
             ): null}
             {(popFilter !== '') ? (
-              <Button variant='outline-secondary' className='m-1' onClick={(e) => setPopFilter('')}>{popFilter} | X</Button>
+              <Col xs='auto'>
+                <Button variant='outline-secondary' onClick={(e) => setPopFilter('')}>{popFilter} | X</Button>
+              </Col>
             ): null}
-          </Col>
         </Row>
         {/* Resource List */}
-        <Row className="mt-2 pt-2">
+        <Row className="pt-2">
           {filteredResources.map((r) => (
-            <Col sm='6' lg='4'>
+            <Col sm='6' lg='4' className='mt-2'>
               <ResourceCard resource={r}/>
             </Col>
           ))}
