@@ -9,7 +9,7 @@ function NavMenu() {
     <Navbar collapseOnSelect fixed="top" variant="dark" bg="secondary" expand="md">
       <Container>
         <Navbar.Brand href="/">
-          <img src={require('../assets/HRGlogo.png')} height="60" />
+          <img src={require('../assets/HRGlogo.png')} height="60" alt='Hamblen Resource Guide Logo' />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">

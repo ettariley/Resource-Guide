@@ -11,7 +11,7 @@ function Events() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
-  });
+  }, []);
 
   return (
     <Fade in={open}>
