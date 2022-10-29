@@ -31,12 +31,13 @@ function About() {
         <Row>
           <h3 className="pt-2">Partners</h3>
           {partners.map((p) => (
-            <Col md="auto" key={p.name}>
+            <Col md="auto" key={p.name} className='pt-2'>
               <Button
-                variant="secondary"
+                variant="outline-secondary"
                 size="lg"
                 href={p.link}
                 target="_blank"
+                className='partner-buttons'
               >
                 {p.name}
               </Button>
