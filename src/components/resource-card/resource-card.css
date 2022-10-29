@@ -1,3 +1,13 @@
 .filter-list {
   display: inline-block;
 }
+
+.form-control {
+  background-color: white;
+  color: rgba(0, 0, 0, 1);
+}
+
+.form-control:focus {
+  background-color: white;
+  color: rgba(0, 0, 0, 1);
+}

@@ -1,22 +1,32 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Modal from 'react-bootstrap/Modal';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
+import Form from 'react-bootstrap/Form';
 import './resource-card.css';
 
 function ResourceCard(props) {
   const { resource } = props;
-  const [show, setShow] = useState(false);
+  const [showFormModal, setShowFormModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
 
   // Sort populations and services list for each resource (A-Z)
   let resourcePop = resource.populationFilters.sort();
   let resourceServ = resource.serviceFilters.sort();
 
-  const handleClose = () => setShow(false);
-  const handleShow = () => setShow(true);
+  const handleCloseFormModal = () => setShowFormModal(false);
+  const handleShowFormModal = () => setShowFormModal(true);
+
+  const handleCloseSuccessModal = () => setShowSuccessModal(false);
+  const handleShowSuccessModal = () => setShowSuccessModal(true);
+
+  const handleSubmitandClose = () => {
+    handleCloseFormModal();
+    handleShowSuccessModal();
+  };
 
   return (
     <>
@@ -56,7 +66,11 @@ function ResourceCard(props) {
               placement="bottom"
               overlay={<Tooltip>Request an edit</Tooltip>}
             >
-              <Button variant="link" className="p-0" onClick={handleShow}>
+              <Button
+                variant="link"
+                className="p-0"
+                onClick={handleShowFormModal}
+              >
                 <i class="bi bi-pencil-square"></i>
               </Button>
             </OverlayTrigger>
@@ -64,19 +78,69 @@ function ResourceCard(props) {
         </Card.Body>
       </Card>
       {/* Request an edit form modal */}
-      <Modal show={show} onHide={handleClose}>
+      <Modal show={showFormModal} onHide={handleCloseFormModal}>
         <Modal.Header closeButton>
           <Modal.Title className="text-bg-light">Request an Edit</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-bg-light">
-          Woohoo, you're reading this text in a modal!
+          <h5>Resource: {resource.provider}</h5>
+          <Form>
+            <Form.Group
+              className="mb-3"
+              controlId="editResourceForm.Identifier"
+            >
+              <Form.Label>I am a...</Form.Label>
+              <Form.Check
+                required
+                type="radio"
+                label="Community Member"
+                name="editResourceFormRadios"
+                id="editResourceFormRadios1"
+              />
+              <Form.Check
+                required
+                type="radio"
+                label="Employee of this Provider"
+                name="editResourceFormRadios"
+                id="editResourceFormRadios2"
+              />
+              <Form.Check
+                required
+                type="radio"
+                label="Employee of another Provider"
+                name="editResourceFormRadios"
+                id="editResourceFormRadios3"
+              />
+            </Form.Group>
+            <Form.Group
+              className="mb-3"
+              controlId="editResourceForm.EditRequest"
+            >
+              <Form.Label>Edit Requested</Form.Label>
+              <Form.Control required as="textarea" rows={3} />
+            </Form.Group>
+          </Form>
         </Modal.Body>
         <Modal.Footer>
-          <Button variant="secondary" onClick={handleClose}>
-            Close
+          <Button variant="secondary" type="submit" onClick={handleSubmitandClose}>
+            Submit
           </Button>
-          <Button variant="primary" onClick={handleClose}>
-            Save Changes
+          <Button variant="primary" onClick={handleCloseFormModal}>
+            Cancel
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Form Submit Success Modal */}
+      <Modal show={showSuccessModal} onHide={handleCloseSuccessModal}>
+        <Modal.Header closeButton>
+          <Modal.Title className="text-bg-light">Request Submitted</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-bg-light">
+          Your request has been sent to our admin.
+        </Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={handleCloseSuccessModal}>
+            Close
           </Button>
         </Modal.Footer>
       </Modal>
