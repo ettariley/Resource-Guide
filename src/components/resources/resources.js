@@ -40,13 +40,13 @@ function Resources() {
     handleShowSuccessModal();
   };
 
-
   // filter statements
   if (searchText !== "") {
     filteredResources = filteredResources.filter(r => r.provider.toLowerCase().includes(searchText.toLowerCase()));
   }
   if (progFilter !== "") {
     filteredResources = filteredResources.filter(s => s.serviceFilters.includes(progFilter));
+
   }
   if (popFilter !== "") {
     filteredResources = filteredResources.filter(p => p.populationFilters.includes(popFilter));
@@ -55,7 +55,7 @@ function Resources() {
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
-  });
+  }, []);
 
   return (
     <Fade in={open}>
@@ -121,10 +121,10 @@ function Resources() {
         <Row>
           <Col>
             {(progFilter !== '') ? (
-              <Button variant='secondary' className='m-1' onClick={(e) => setProgFilter('')}>{progFilter} | X</Button>
+              <Button variant='outline-light' className='m-1' onClick={(e) => setProgFilter('')}>{progFilter} | X</Button>
             ): null}
             {(popFilter !== '') ? (
-              <Button variant='outline-light' className='m-1' onClick={(e) => setPopFilter('')}>{popFilter} | X</Button>
+              <Button variant='outline-secondary' className='m-1' onClick={(e) => setPopFilter('')}>{popFilter} | X</Button>
             ): null}
           </Col>
         </Row>
@@ -190,7 +190,7 @@ function Resources() {
                 <Form.Control type='text' required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Website">
-                <Form.Label>Website Link:</Form.Label>
+                <Form.Label>Website Link (optional):</Form.Label>
                 <Form.Control type='text'/>
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Description">
@@ -200,11 +200,11 @@ function Resources() {
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseNewResourceModal}>
-              Close
+            <Button variant="secondary" type='submit' onClick={handleSubmitandClose}>
+              Submit
             </Button>
             <Button variant="primary" onClick={handleCloseNewResourceModal}>
-              Save Changes
+              Cancel
             </Button>
           </Modal.Footer>
         </Modal>
