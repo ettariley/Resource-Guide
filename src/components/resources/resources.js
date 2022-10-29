@@ -7,6 +7,8 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Form from 'react-bootstrap/Form';
 import ResourceCard from '../resource-card/resource-card';
+import Button from 'react-bootstrap/Button';
+import Modal from 'react-bootstrap/Modal';
 import {
   mockResources,
   mockServiceFilters,
@@ -16,9 +18,39 @@ import './resources.css';
 
 function Resources() {
   const [open, setOpen] = useState(false);
+  const [showNewResourceModal, setShowNewResourceModal] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [searchText, setSearchText] = useState('');
+  const [progFilter, setProgFilter] = useState('');
+  const [popFilter, setPopFilter] = useState('');
+
   let resources = mockResources;
+  let filteredResources = resources;
   let programFilters = mockServiceFilters.sort();
   let populationFilters = mockPopulationFilters.sort();
+
+  const handleCloseNewResourceModal = () => setShowNewResourceModal(false);
+  const handleShowNewResourceModal = () => setShowNewResourceModal(true);
+
+  const handleCloseSuccessModal = () => setShowSuccessModal(false);
+  const handleShowSuccessModal = () => setShowSuccessModal(true);
+
+  const handleSubmitandClose = () => {
+    handleCloseNewResourceModal();
+    handleShowSuccessModal();
+  };
+
+
+  // filter statements
+  if (searchText !== "") {
+    filteredResources = filteredResources.filter(r => r.provider.toLowerCase().includes(searchText.toLowerCase()));
+  }
+  if (progFilter !== "") {
+    filteredResources = filteredResources.filter(s => s.serviceFilters.includes(progFilter));
+  }
+  if (popFilter !== "") {
+    filteredResources = filteredResources.filter(p => p.populationFilters.includes(popFilter));
+  }
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -45,50 +77,151 @@ function Resources() {
           </Col>
         </Row>
         <Row className="mt-3 mb-3">
-          <Col sm="auto">
+          <Col md="auto">
             <h5 className="mt-2">Search and Filter: </h5>
           </Col>
           {/* text search feature */}
-          <Col>
+          <Col md='4' className='p-2'>
             <Form.Control
               type="text"
               className="text-filter-form"
-              placeholder="Search Resources"
+              value={searchText}
+              onChange={(e) => setSearchText(e.target.value)}
+              placeholder="Search Resources by Name"
             />
           </Col>
           {/* Program filter */}
-          <Col sm="auto">
+          <Col md='auto' className='p-2'>
             <DropdownButton
               variant="secondary"
               id="program-filter-dropdown"
               title="Programs"
+              onSelect={(p) => setProgFilter(p)}
             >
               {programFilters.map((p) => (
-                <Dropdown.Item href="#/action">{p}</Dropdown.Item>
+                <Dropdown.Item eventKey={p}>{p}</Dropdown.Item>
               ))}
             </DropdownButton>
           </Col>
           {/* Population filter */}
-          <Col sm="auto">
+          <Col md='auto' className='p-2'>
             <DropdownButton
               variant="secondary"
               id="population-filter-dropdown"
               title="Populations"
+              onSelect={(f) => setPopFilter(f)}
             >
               {populationFilters.map((f) => (
-                <Dropdown.Item href="#/action">{f}</Dropdown.Item>
+                <Dropdown.Item eventKey={f}>{f}</Dropdown.Item>
               ))}
             </DropdownButton>
           </Col>
         </Row>
+        {/* Show selected filters */}
+        <Row>
+          <Col>
+            {(progFilter !== '') ? (
+              <Button variant='secondary' className='m-1' onClick={(e) => setProgFilter('')}>{progFilter} | X</Button>
+            ): null}
+            {(popFilter !== '') ? (
+              <Button variant='outline-light' className='m-1' onClick={(e) => setPopFilter('')}>{popFilter} | X</Button>
+            ): null}
+          </Col>
+        </Row>
         {/* Resource List */}
         <Row className="mt-2 pt-2">
-          {resources.map((r) => (
-            <Col>
-              <ResourceCard resource={r} />
+          {filteredResources.map((r) => (
+            <Col sm='6' lg='4'>
+              <ResourceCard resource={r}/>
             </Col>
           ))}
         </Row>
+        {/* Share a new resource */}
+        <Row className="mt-2 pt-2 pb-2">
+          <Col>
+            <h4>Do you know of a resource that isn't on this list?</h4>
+            <Button variant='secondary' onClick={handleShowNewResourceModal}>Share a New Resource</Button>
+          </Col>
+        </Row>
+        {/* Share a new resource modal */}
+        <Modal show={showNewResourceModal} onHide={handleCloseNewResourceModal}>
+          <Modal.Header closeButton>
+            <Modal.Title className="text-bg-light">Share a New Resource</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-bg-light">
+            <Form>
+              <Form.Group
+                className="mb-3"
+                controlId="newResourceForm.Identifier"
+              >
+                <Form.Label>I am a...</Form.Label>
+                <Form.Check
+                  required
+                  type="radio"
+                  label="Community Member"
+                  name="newResourceFormRadios"
+                  id="newResourceFormRadios1"
+                />
+                <Form.Check
+                  required
+                  type="radio"
+                  label="Employee of this Provider"
+                  name="newResourceFormRadios"
+                  id="newResourceFormRadios2"
+                />
+                <Form.Check
+                  required
+                  type="radio"
+                  label="Employee of another Provider"
+                  name="newResourceFormRadios"
+                  id="newResourceFormRadios3"
+                />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="newResourceForm.Provider">
+                <Form.Label>Resource Provider Name:</Form.Label>
+                <Form.Control type='text' required />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="newResourceForm.Address">
+                <Form.Label>Address:</Form.Label>
+                <Form.Control type='text' required />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="newResourceForm.Phone">
+                <Form.Label>Phone:</Form.Label>
+                <Form.Control type='text' required />
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="newResourceForm.Website">
+                <Form.Label>Website Link:</Form.Label>
+                <Form.Control type='text'/>
+              </Form.Group>
+              <Form.Group className="mb-3" controlId="newResourceForm.Description">
+                <Form.Label>Provide a short description of the resource.</Form.Label>
+                <Form.Control required as="textarea" rows={3} />
+              </Form.Group>
+            </Form>
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseNewResourceModal}>
+              Close
+            </Button>
+            <Button variant="primary" onClick={handleCloseNewResourceModal}>
+              Save Changes
+            </Button>
+          </Modal.Footer>
+        </Modal>
+        {/* Form Submit Success Modal */}
+        <Modal show={showSuccessModal} onHide={handleCloseSuccessModal}>
+          <Modal.Header closeButton>
+            <Modal.Title className="text-bg-light">Request Submitted</Modal.Title>
+          </Modal.Header>
+          <Modal.Body className="text-bg-light">
+            Your request has been sent to our admin.
+          </Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={handleCloseSuccessModal}>
+              Close
+            </Button>
+          </Modal.Footer>
+        </Modal>
       </Container>
     </Fade>
   );
