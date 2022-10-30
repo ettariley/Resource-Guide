@@ -5,9 +5,17 @@ $body-bg: #234257;
 $body-color: white;
 $headings-font-family: 'Alegreya Sans SC', sans-serif;
 
+$out-of-range-bg-color: #e6e7e8;
+$today-highlight-bg: $secondary;
+$event-bg: $primary;
+$event-border: darken($primary, 10%);
+$event-outline: rgb(255, 255, 255, 0);
+$current-time-color: $primary;
+
 .bi:hover {
   color: #72b7a3;
 }
 
+@import 'react-big-calendar/lib/sass/styles';
 // Import Bootstrap and its default variables
 @import '~bootstrap/scss/bootstrap.scss';

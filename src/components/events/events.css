@@ -2,3 +2,21 @@
   padding-top: 100px;
   padding-bottom: 20px;
 }
+
+.event-calendar {
+  min-height: 600px;
+}
+
+.rbc-month-view, .rbc-btn-group, .rbc-time-view {
+  background-color: rgba(137, 178, 174, 0.8);
+}
+
+.rbc-month-header {
+  background-color: #89b2ae;
+}
+
+.rbc-toolbar-label {
+  font-family: 'Alegreya Sans SC', sans-serif;
+  font-size: 1.25rem;
+  font-weight: 500;
+}
