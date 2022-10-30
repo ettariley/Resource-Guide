@@ -6,9 +6,10 @@ import Fade from 'react-bootstrap/Fade';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Form from 'react-bootstrap/Form';
-import ResourceCard from '../resource-card/resource-card';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import ResourceCard from '../resource-card/resource-card';
+import SuccessModal from '../success-modal/success-modal';
 import {
   mockResources,
   mockServiceFilters,
@@ -46,7 +47,6 @@ function Resources() {
   }
   if (progFilter !== "") {
     filteredResources = filteredResources.filter(s => s.serviceFilters.includes(progFilter));
-
   }
   if (popFilter !== "") {
     filteredResources = filteredResources.filter(p => p.populationFilters.includes(popFilter));
@@ -211,19 +211,7 @@ function Resources() {
           </Modal.Footer>
         </Modal>
         {/* Form Submit Success Modal */}
-        <Modal show={showSuccessModal} onHide={handleCloseSuccessModal}>
-          <Modal.Header closeButton>
-            <Modal.Title className="text-bg-light">Request Submitted</Modal.Title>
-          </Modal.Header>
-          <Modal.Body className="text-bg-light">
-            Your request has been sent to our admin.
-          </Modal.Body>
-          <Modal.Footer>
-            <Button variant="secondary" onClick={handleCloseSuccessModal}>
-              Close
-            </Button>
-          </Modal.Footer>
-        </Modal>
+        <SuccessModal showSuccessModal={showSuccessModal} handleCloseSuccessModal={handleCloseSuccessModal} />
       </Container>
     </Fade>
   );

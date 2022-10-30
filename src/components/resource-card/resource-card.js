@@ -6,6 +6,7 @@ import Modal from 'react-bootstrap/Modal';
 import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import Form from 'react-bootstrap/Form';
+import SuccessModal from '../success-modal/success-modal';
 import './resource-card.css';
 
 function ResourceCard(props) {
@@ -131,19 +132,7 @@ function ResourceCard(props) {
         </Modal.Footer>
       </Modal>
       {/* Form Submit Success Modal */}
-      <Modal show={showSuccessModal} onHide={handleCloseSuccessModal}>
-        <Modal.Header closeButton>
-          <Modal.Title className="text-bg-light">Request Submitted</Modal.Title>
-        </Modal.Header>
-        <Modal.Body className="text-bg-light">
-          Your request has been sent to our admin.
-        </Modal.Body>
-        <Modal.Footer>
-          <Button variant="secondary" onClick={handleCloseSuccessModal}>
-            Close
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <SuccessModal showSuccessModal={showSuccessModal} handleCloseSuccessModal={handleCloseSuccessModal} />
     </>
   );
 }
