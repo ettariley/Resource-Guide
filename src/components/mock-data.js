@@ -46,21 +46,59 @@ const mockResources = [
       featuredText: '',
     },
   },
+  {
+    provider: 'Ready by 6',
+    address: '1149 Kennedy Circle, Morristown, TN 37814',
+    website: 'https://www.hcexcell.org/ready-by-6-1',
+    phone: '423-312-8661',
+    serviceFilters: ['Early Childhood','Education', 'Parenting'],
+    populationFilters: ['Children', 'Parents'],
+    description:
+      'Ready by 6 is a community effort to assist families in having the skills and resources for their young children to enter and succeed in school.',
+    featured: {
+      isFeatured: '', // boolean
+      featuredText: '',
+    },
+  },
 ];
 
 const mockEvents = [
   {
-    eventName: '',
-    eventHost: '',
-    startDateTime: '',
-    endDateTime: '',
-    location: '',
-    description: '',
-    eventLink: '',
-    populationFilters: {
-      name: '',
-    },
+    id: 1,
+    title: 'Food Giveaway',
+    eventHost: 'Morristown-Hamblen Central Services',
+    start: new Date(2022, 9, 31, 18, 30),
+    end: new Date(2022, 9, 31, 20, 30),
+    location: '2450 S. Cumberland St. Morristown, TN 37813',
+    hostPhone: '423-586-9431',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    eventLink: 'https://mhcentralservices.org/',
+    population: ''
   },
+  {
+    id: 2,
+    title: 'Reading event for kids',
+    eventHost: 'Ready by 6',
+    start: new Date(2022, 9, 31,),
+    end: new Date(2022, 10, 3),
+    location: '1149 Kennedy Circle, Morristown, TN 37814',
+    hostPhone: '423-312-8661',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    eventLink: 'https://www.hcexcell.org/ready-by-6-1',
+    population: 'Children'
+  },
+  {
+    id: 3,
+    title: 'Veterans Day Celebration',
+    eventHost: 'Douglas-Cherokee Economic Authority',
+    start: new Date(2022, 10, 11, 8),
+    end: new Date(2022, 10, 13, 17),
+    location: '534 East 1st North St. Morristown, TN 37814',
+    hostPhone: '423-587-4500',
+    description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
+    eventLink: 'https://www.douglascherokee.com/',
+    population: 'Veterans'
+  }
 ];
 
 const mockFeaturedEvents = [
@@ -119,7 +157,7 @@ const mockServiceFilters = [
 ];
 
 // Filled out, probably all but need to check
-const mockPopulationFilters = ['Children', 'Adults', 'Seniors', 'Veterans'];
+const mockPopulationFilters = ['Children', 'Parents', 'Adults', 'Seniors', 'Veterans'];
 
 export {
   mockResources,
