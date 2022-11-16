@@ -10,12 +10,15 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import ResourceCard from '../resource-card/resource-card';
 import SuccessModal from '../success-modal/success-modal';
-import {
-  mockResources,
-  mockServiceFilters,
-  mockPopulationFilters,
-} from '../mock-data';
+// import {
+//   mockResources,
+//   mockServiceFilters,
+//   mockPopulationFilters,
+// } from '../mock-data';
+import { query, orderBy, collection, doc, getDocs, getDoc, onSnapshot } from 'firebase/firestore';
+import { db } from '../../firebase';
 import './resources.css';
+import { async } from '@firebase/util';
 
 function Resources() {
   const [open, setOpen] = useState(false);
@@ -24,11 +27,20 @@ function Resources() {
   const [searchText, setSearchText] = useState('');
   const [progFilter, setProgFilter] = useState('');
   const [popFilter, setPopFilter] = useState('');
+  const [filteredResources, setFilteredResources] = useState([]);
+  const [featuredResourcesText, setFeaturedResourcesText] = useState('');
+  const [programFilters, setProgramFilters] = useState([]);
+  const [populationFilters, setPopulationFilters] = useState([]);
 
-  let resources = mockResources;
-  let filteredResources = resources;
-  let programFilters = mockServiceFilters.sort();
-  let populationFilters = mockPopulationFilters.sort();
+  // Set featured text
+  const featuredTextQuery = query(doc(db, "Featured-Texts", "ResourcePage"));
+  const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
+    setFeaturedResourcesText(textSnapshot.data().Text);
+  });
+ 
+  // Set resources
+  const resources = collection(db, 'Resources');
+  // let filteredResources = [];  
 
   const handleCloseNewResourceModal = () => setShowNewResourceModal(false);
   const handleShowNewResourceModal = () => setShowNewResourceModal(true);
@@ -42,19 +54,64 @@ function Resources() {
   };
 
   // filter statements
-  if (searchText !== "") {
-    filteredResources = filteredResources.filter(r => r.provider.toLowerCase().includes(searchText.toLowerCase()));
+  if (searchText !== '') {
+    filteredResources = filteredResources.filter((r) =>
+      r.provider.toLowerCase().includes(searchText.toLowerCase())
+    );
   }
-  if (progFilter !== "") {
-    filteredResources = filteredResources.filter(s => s.serviceFilters.includes(progFilter));
+  if (progFilter !== '') {
+    filteredResources = filteredResources.filter((s) =>
+      s.serviceFilters.includes(progFilter)
+    );
   }
-  if (popFilter !== "") {
-    filteredResources = filteredResources.filter(p => p.populationFilters.includes(popFilter));
+  if (popFilter !== '') {
+    filteredResources = filteredResources.filter((p) =>
+      p.populationFilters.includes(popFilter)
+    );
   }
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
+  }, []);
+
+  useEffect(() => {
+    const resourcesQuery = query(resources, orderBy('provider'));
+    const resourcesArray = [];
+    const resourcesQSnapshot = getDocs(resourcesQuery).then((resourcesQSnapshot) => {
+      resourcesQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        resourcesArray.push({
+          address: data.address,
+          description: data.description,
+          phone: data.phone,
+          populationFilters: data.populationFilters,
+          provider: data.provider,
+          serviceFilters: data.serviceFilters,
+          website: data.website
+        });
+      });
+    })
+    setFilteredResources(resourcesArray);
+    console.log(filteredResources);
+  }, []);
+
+  // Set program filters list
+  useEffect(() => {
+    const programFilterQuery = query(doc(db, "Filters", "Programs"));
+    const programsSnapshot = getDoc(programFilterQuery).then((programsSnapshot) => {
+      setProgramFilters((programsSnapshot.data().filters).sort());
+      console.log(programFilters);
+    });
+  }, []);
+
+  // Set population filters list
+  useEffect(() => {
+    const populationFilterQuery = query(doc(db, "Filters", "Populations"));
+    const populationsSnapshot = getDoc(populationFilterQuery).then((populationsSnapshot) => {
+      setPopulationFilters((populationsSnapshot.data().filters).sort());
+      console.log(populationFilters);
+    });
   }, []);
 
   return (
@@ -65,14 +122,7 @@ function Resources() {
           <Col>
             <h4>Featured Programs and Announcements</h4>
             <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur.
-              </p>
+              <p>{featuredResourcesText}</p>
             </div>
           </Col>
         </Row>
@@ -81,7 +131,7 @@ function Resources() {
             <h5 className="mt-2">Search and Filter: </h5>
           </Col>
           {/* text search feature */}
-          <Col md='4' className='p-2'>
+          <Col md="4" className="p-2">
             <Form.Control
               type="text"
               className="text-filter-form"
@@ -91,7 +141,7 @@ function Resources() {
             />
           </Col>
           {/* Program filter */}
-          <Col md='auto' className='p-2'>
+          <Col md="auto" className="p-2">
             <DropdownButton
               variant="secondary"
               id="program-filter-dropdown"
@@ -104,7 +154,7 @@ function Resources() {
             </DropdownButton>
           </Col>
           {/* Population filter */}
-          <Col md='auto' className='p-2'>
+          <Col md="auto" className="p-2">
             <DropdownButton
               variant="secondary"
               id="population-filter-dropdown"
@@ -119,22 +169,32 @@ function Resources() {
         </Row>
         {/* Show selected filters */}
         <Row>
-            {(progFilter !== '') ? (
-              <Col xs='auto' className='pb-2'>
-                <Button variant='outline-light' onClick={(e) => setProgFilter('')}>{progFilter} | X</Button>
-              </Col>
-            ): null}
-            {(popFilter !== '') ? (
-              <Col xs='auto'>
-                <Button variant='outline-secondary' onClick={(e) => setPopFilter('')}>{popFilter} | X</Button>
-              </Col>
-            ): null}
+          {progFilter !== '' ? (
+            <Col xs="auto" className="pb-2">
+              <Button
+                variant="outline-light"
+                onClick={(e) => setProgFilter('')}
+              >
+                {progFilter} | X
+              </Button>
+            </Col>
+          ) : null}
+          {popFilter !== '' ? (
+            <Col xs="auto">
+              <Button
+                variant="outline-secondary"
+                onClick={(e) => setPopFilter('')}
+              >
+                {popFilter} | X
+              </Button>
+            </Col>
+          ) : null}
         </Row>
         {/* Resource List */}
         <Row className="pt-2">
           {filteredResources.map((r) => (
-            <Col sm='6' lg='4' className='mt-2'>
-              <ResourceCard resource={r}/>
+            <Col sm="6" lg="4" className="mt-2">
+              <ResourceCard resource={r} />
             </Col>
           ))}
         </Row>
@@ -142,13 +202,17 @@ function Resources() {
         <Row className="mt-2 pt-2 pb-2">
           <Col>
             <h4>Do you know of a resource that isn't on this list?</h4>
-            <Button variant='secondary' onClick={handleShowNewResourceModal}>Share a New Resource</Button>
+            <Button variant="secondary" onClick={handleShowNewResourceModal}>
+              Share a New Resource
+            </Button>
           </Col>
         </Row>
         {/* Share a new resource modal */}
         <Modal show={showNewResourceModal} onHide={handleCloseNewResourceModal}>
           <Modal.Header closeButton>
-            <Modal.Title className="text-bg-light">Share a New Resource</Modal.Title>
+            <Modal.Title className="text-bg-light">
+              Share a New Resource
+            </Modal.Title>
           </Modal.Header>
           <Modal.Body className="text-bg-light">
             <Form>
@@ -181,28 +245,37 @@ function Resources() {
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Provider">
                 <Form.Label>Resource Provider Name:</Form.Label>
-                <Form.Control type='text' required />
+                <Form.Control type="text" required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Address">
                 <Form.Label>Address:</Form.Label>
-                <Form.Control type='text' required />
+                <Form.Control type="text" required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Phone">
                 <Form.Label>Phone:</Form.Label>
-                <Form.Control type='text' required />
+                <Form.Control type="text" required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Website">
                 <Form.Label>Website Link (optional):</Form.Label>
-                <Form.Control type='text'/>
+                <Form.Control type="text" />
               </Form.Group>
-              <Form.Group className="mb-3" controlId="newResourceForm.Description">
-                <Form.Label>Provide a short description of the resource.</Form.Label>
+              <Form.Group
+                className="mb-3"
+                controlId="newResourceForm.Description"
+              >
+                <Form.Label>
+                  Provide a short description of the resource.
+                </Form.Label>
                 <Form.Control required as="textarea" rows={3} />
               </Form.Group>
             </Form>
           </Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" type='submit' onClick={handleSubmitandClose}>
+            <Button
+              variant="secondary"
+              type="submit"
+              onClick={handleSubmitandClose}
+            >
               Submit
             </Button>
             <Button variant="primary" onClick={handleCloseNewResourceModal}>
@@ -211,7 +284,10 @@ function Resources() {
           </Modal.Footer>
         </Modal>
         {/* Form Submit Success Modal */}
-        <SuccessModal showSuccessModal={showSuccessModal} handleCloseSuccessModal={handleCloseSuccessModal} />
+        <SuccessModal
+          showSuccessModal={showSuccessModal}
+          handleCloseSuccessModal={handleCloseSuccessModal}
+        />
       </Container>
     </Fade>
   );
