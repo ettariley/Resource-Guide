@@ -73,7 +73,8 @@ const mockEvents = [
     hostPhone: '423-586-9431',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     eventLink: 'https://mhcentralservices.org/',
-    population: ''
+    population: '',
+    tags: '',
   },
   {
     id: 2,
@@ -85,7 +86,8 @@ const mockEvents = [
     hostPhone: '423-312-8661',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     eventLink: 'https://www.hcexcell.org/ready-by-6-1',
-    population: 'Children'
+    population: 'Children',
+    tags: '',
   },
   {
     id: 3,
@@ -97,7 +99,8 @@ const mockEvents = [
     hostPhone: '423-587-4500',
     description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.',
     eventLink: 'https://www.douglascherokee.com/',
-    population: 'Veterans'
+    population: 'Veterans',
+    tags: '',
   }
 ];
 

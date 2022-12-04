@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -13,10 +13,9 @@ function ResourceCard(props) {
   const { resource } = props;
   const [showFormModal, setShowFormModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-
-  // Sort populations and services list for each resource (A-Z)
-  let resourcePop = resource.populationFilters.sort();
-  let resourceServ = resource.serviceFilters.sort();
+  
+  const resourcePop = useRef(resource.populationFilters.sort());
+  const resourceServ = useRef(resource.serviceFilters.sort());
 
   const handleCloseFormModal = () => setShowFormModal(false);
   const handleShowFormModal = () => setShowFormModal(true);
@@ -47,15 +46,15 @@ function ResourceCard(props) {
           </Card.Text>
           <Card.Text>{resource.description}</Card.Text>
           <h5>Services:</h5>
-          {resourceServ.map((s) => (
-            <ListGroup horizontal className="filter-list m-1">
+          {resourceServ.current.map((s) => (
+            <ListGroup key={s} horizontal className="filter-list m-1">
               <ListGroup.Item variant="primary">{s}</ListGroup.Item>
             </ListGroup>
           ))}
-          {resourcePop.length !== 0 ? (
+          {resourcePop.current.at(0) !== '' ? (
             <>
               <h5>Populations:</h5>
-              {resourcePop.map((p) => (
+              {resourcePop.current.map((p) => (
                 <ListGroup horizontal className="filter-list m-1">
                   <ListGroup.Item variant="secondary">{p}</ListGroup.Item>
                 </ListGroup>
@@ -72,7 +71,7 @@ function ResourceCard(props) {
                 className="p-0"
                 onClick={handleShowFormModal}
               >
-                <i class="bi bi-pencil-square"></i>
+                <i className="bi bi-pencil-square"></i>
               </Button>
             </OverlayTrigger>
           </Card.Text>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -10,12 +10,15 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import ResourceCard from '../resource-card/resource-card';
 import SuccessModal from '../success-modal/success-modal';
-// import {
-//   mockResources,
-//   mockServiceFilters,
-//   mockPopulationFilters,
-// } from '../mock-data';
-import { query, orderBy, collection, doc, getDocs, getDoc, onSnapshot } from 'firebase/firestore';
+import {
+  query,
+  orderBy,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+  onSnapshot,
+} from 'firebase/firestore';
 import { db } from '../../firebase';
 import './resources.css';
 import { async } from '@firebase/util';
@@ -24,24 +27,40 @@ function Resources() {
   const [open, setOpen] = useState(false);
   const [showNewResourceModal, setShowNewResourceModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [searchText, setSearchText] = useState('');
-  const [progFilter, setProgFilter] = useState('');
-  const [popFilter, setPopFilter] = useState('');
+  const [resourcesList, setResourcesList] = useState([]);
   const [filteredResources, setFilteredResources] = useState([]);
   const [featuredResourcesText, setFeaturedResourcesText] = useState('');
+  // for dropdown lists of filters
   const [programFilters, setProgramFilters] = useState([]);
   const [populationFilters, setPopulationFilters] = useState([]);
 
+  // for setting filters
+  const searchText = useRef('');
+  const progFilter = useRef('');
+  const popFilter = useRef('');
+  let filteredArray = [];
+
+  // methods for updating refs
+  const updateSearchText = (value) => {
+    searchText.current = value;
+    filterResources();
+  };
+  const updateProgFilter = (prog) => {
+    progFilter.current = prog;
+    filterResources();
+  };
+  const updatePopFilter = (pop) => {
+    popFilter.current = pop;
+    filterResources();
+  };
+
   // Set featured text
-  const featuredTextQuery = query(doc(db, "Featured-Texts", "ResourcePage"));
+  const featuredTextQuery = query(doc(db, 'Featured-Texts', 'ResourcePage'));
   const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
     setFeaturedResourcesText(textSnapshot.data().Text);
   });
- 
-  // Set resources
-  const resources = collection(db, 'Resources');
-  // let filteredResources = [];  
 
+  // Methods for opening & closing modals
   const handleCloseNewResourceModal = () => setShowNewResourceModal(false);
   const handleShowNewResourceModal = () => setShowNewResourceModal(true);
 
@@ -54,64 +73,107 @@ function Resources() {
   };
 
   // filter statements
-  if (searchText !== '') {
-    filteredResources = filteredResources.filter((r) =>
-      r.provider.toLowerCase().includes(searchText.toLowerCase())
-    );
-  }
-  if (progFilter !== '') {
-    filteredResources = filteredResources.filter((s) =>
-      s.serviceFilters.includes(progFilter)
-    );
-  }
-  if (popFilter !== '') {
-    filteredResources = filteredResources.filter((p) =>
-      p.populationFilters.includes(popFilter)
-    );
-  }
+  const filterResources = () => {
+    console.log("text: " + searchText.current);
+    console.log("prog: " + progFilter.current);
+    console.log("pop: " + popFilter.current);
+    switch (true) {
+      case (searchText.current !== '' && progFilter.current !== '' && popFilter.current !== ''):
+        filteredArray = filteredResources.filter((r) =>
+          r.provider.toLowerCase().includes(searchText.current.toLowerCase())
+        );
+        filteredArray = filteredArray.filter((s) => s.serviceFilters.includes(progFilter.current));
+        filteredArray = filteredArray.filter((p) => p.populationFilters.includes(popFilter.current));
+        setFilteredResources(filteredArray);
+        break;
+      case (searchText.current !== '' && progFilter.current !== ''):
+        filteredArray = filteredResources.filter((r) =>
+          r.provider.toLowerCase().includes(searchText.current.toLowerCase())
+        );
+        filteredArray = filteredArray.filter((s) => s.serviceFilters.includes(progFilter.current));
+        setFilteredResources(filteredArray);
+        break;
+      case (searchText.current !== '' && popFilter.current !== ''):
+        filteredArray = filteredResources.filter((r) =>
+          r.provider.toLowerCase().includes(searchText.current.toLowerCase())
+        );
+        filteredArray = filteredArray.filter((p) => p.populationFilters.includes(popFilter.current));
+        setFilteredResources(filteredArray);
+        break;
+      case (progFilter.current !== '' && popFilter.current !== ''):
+        filteredArray = filteredResources.filter((s) => s.serviceFilters.includes(progFilter.current));
+        filteredArray = filteredArray.filter((p) => p.populationFilters.includes(popFilter.current));
+        setFilteredResources(filteredArray);
+        break;
+      case (searchText.current !== ''):
+        setFilteredResources(
+          resourcesList.filter((r) =>
+            r.provider.toLowerCase().includes(searchText.current.toLowerCase())
+        ));
+        break;
+      case (progFilter.current !== ''):
+        setFilteredResources(resourcesList.filter((s) => s.serviceFilters.includes(progFilter.current)));
+        break;
+      case (popFilter.current !== ''):
+        setFilteredResources(resourcesList.filter((p) => p.populationFilters.includes(popFilter.current)));
+        break;
+      default:
+        setFilteredResources(resourcesList);
+        break;
+    }
+  };
 
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
   }, []);
 
+  // set list of resources on first render
   useEffect(() => {
-    const resourcesQuery = query(resources, orderBy('provider'));
+    // Set resources and blank array
+    const resources = collection(db, 'Resources');
     const resourcesArray = [];
-    const resourcesQSnapshot = getDocs(resourcesQuery).then((resourcesQSnapshot) => {
-      resourcesQSnapshot.forEach((doc) => {
-        let data = doc.data();
-        resourcesArray.push({
-          address: data.address,
-          description: data.description,
-          phone: data.phone,
-          populationFilters: data.populationFilters,
-          provider: data.provider,
-          serviceFilters: data.serviceFilters,
-          website: data.website
+    // get resources in order from database and push to array
+    const resourcesQuery = query(resources, orderBy('provider'));
+    const resourcesQSnapshot = getDocs(resourcesQuery).then(
+      (resourcesQSnapshot) => {
+        resourcesQSnapshot.forEach((doc) => {
+          let data = doc.data();
+          resourcesArray.push({
+            address: data.address,
+            description: data.description,
+            id: data.id,
+            phone: data.phone,
+            populationFilters: data.populationFilters,
+            provider: data.provider,
+            serviceFilters: data.serviceFilters,
+            website: data.website,
+          });
         });
-      });
-    })
-    setFilteredResources(resourcesArray);
-    console.log(filteredResources);
+        setResourcesList(resourcesArray);
+        setFilteredResources(resourcesArray);
+      }
+    );
   }, []);
 
   // Set program filters list
   useEffect(() => {
-    const programFilterQuery = query(doc(db, "Filters", "Programs"));
-    const programsSnapshot = getDoc(programFilterQuery).then((programsSnapshot) => {
-      setProgramFilters((programsSnapshot.data().filters).sort());
-      console.log(programFilters);
-    });
+    const programFilterQuery = query(doc(db, 'Filters', 'Programs'));
+    const programsSnapshot = getDoc(programFilterQuery).then(
+      (programsSnapshot) => {
+        setProgramFilters(programsSnapshot.data().filters.sort());
+      }
+    );
   }, []);
 
   // Set population filters list
   useEffect(() => {
-    const populationFilterQuery = query(doc(db, "Filters", "Populations"));
-    const populationsSnapshot = getDoc(populationFilterQuery).then((populationsSnapshot) => {
-      setPopulationFilters((populationsSnapshot.data().filters).sort());
-      console.log(populationFilters);
-    });
+    const populationFilterQuery = query(doc(db, 'Filters', 'Populations'));
+    const populationsSnapshot = getDoc(populationFilterQuery).then(
+      (populationsSnapshot) => {
+        setPopulationFilters(populationsSnapshot.data().filters.sort());
+      }
+    );
   }, []);
 
   return (
@@ -135,8 +197,8 @@ function Resources() {
             <Form.Control
               type="text"
               className="text-filter-form"
-              value={searchText}
-              onChange={(e) => setSearchText(e.target.value)}
+              value={searchText.current}
+              onChange={(e) => updateSearchText(e.target.value)}
               placeholder="Search Resources by Name"
             />
           </Col>
@@ -145,11 +207,13 @@ function Resources() {
             <DropdownButton
               variant="secondary"
               id="program-filter-dropdown"
-              title="Programs"
-              onSelect={(p) => setProgFilter(p)}
+              title="Services"
+              onSelect={(p) => updateProgFilter(p)}
             >
               {programFilters.map((p) => (
-                <Dropdown.Item eventKey={p}>{p}</Dropdown.Item>
+                <Dropdown.Item key={p} eventKey={p}>
+                  {p}
+                </Dropdown.Item>
               ))}
             </DropdownButton>
           </Col>
@@ -159,33 +223,35 @@ function Resources() {
               variant="secondary"
               id="population-filter-dropdown"
               title="Populations"
-              onSelect={(f) => setPopFilter(f)}
+              onSelect={(f) => updatePopFilter(f)}
             >
               {populationFilters.map((f) => (
-                <Dropdown.Item eventKey={f}>{f}</Dropdown.Item>
+                <Dropdown.Item key={f} eventKey={f}>
+                  {f}
+                </Dropdown.Item>
               ))}
             </DropdownButton>
           </Col>
         </Row>
         {/* Show selected filters */}
         <Row>
-          {progFilter !== '' ? (
+          {progFilter.current !== '' ? (
             <Col xs="auto" className="pb-2">
               <Button
                 variant="outline-light"
-                onClick={(e) => setProgFilter('')}
+                onClick={(e) => updateProgFilter('')}
               >
-                {progFilter} | X
+                {progFilter.current} | X
               </Button>
             </Col>
           ) : null}
-          {popFilter !== '' ? (
+          {popFilter.current !== '' ? (
             <Col xs="auto">
               <Button
                 variant="outline-secondary"
-                onClick={(e) => setPopFilter('')}
+                onClick={(e) => updatePopFilter('')}
               >
-                {popFilter} | X
+                {popFilter.current} | X
               </Button>
             </Col>
           ) : null}
@@ -194,7 +260,7 @@ function Resources() {
         <Row className="pt-2">
           {filteredResources.map((r) => (
             <Col sm="6" lg="4" className="mt-2">
-              <ResourceCard resource={r} />
+              <ResourceCard key={r.id} resource={r} />
             </Col>
           ))}
         </Row>

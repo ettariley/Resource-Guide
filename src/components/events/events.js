@@ -1,5 +1,5 @@
 /* eslint-disable no-restricted-globals */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Fade from 'react-bootstrap/Fade';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
@@ -13,23 +13,128 @@ import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
-import { mockEvents, mockPopulationFilters } from '../mock-data';
 import SuccessModal from '../success-modal/success-modal';
+import {
+  query,
+  collection,
+  doc,
+  getDocs,
+  getDoc,
+} from 'firebase/firestore';
+import { db } from '../../firebase';
 import './events.css';
 
 function Events() {
   const [open, setOpen] = useState(false);
-  const [event, setEvent] = useState('');
   const [showEventModal, setShowEventModal] = useState(false);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
-  const [searchEventText, setSearchEventText] = useState('');
-  const [eventPopFilter, setEventPopFilter] = useState('');
+  const [event, setEvent] = useState('');
+  const [events, setEvents] = useState([]);
+  const [filteredEvents, setFilteredEvents] = useState([]);
+  const [featuredEventText, setFeaturedEventText] = useState('');
+  const [populationFilters, setPopulationFilters] = useState([]);
+  const [tagFilters, setTagFilters] = useState([]);
 
   const localizer = momentLocalizer(moment);
 
-  let events = mockEvents;
-  let populationFilters = mockPopulationFilters.sort();
+  // for setting filters
+  const searchEventText = useRef('');
+  const eventTagFilter = useRef('');
+  const eventPopFilter = useRef('');
+  let filteredArray = [];
+  // let filteredEvents = [];
+
+  // methods for updating refs
+  const updateEventSearchText = (value) => {
+    searchEventText.current = value;
+    filterEvents();
+  };
+  const updateEventTagFilter = (tag) => {
+    eventTagFilter.current = tag;
+    filterEvents();
+  };
+  const updateEventPopFilter = (pop) => {
+    eventPopFilter.current = pop;
+    filterEvents();
+  };
+
+  const filterEvents = () => {
+    console.log('text: ' + searchEventText.current);
+    console.log('tag: ' + eventTagFilter.current);
+    console.log('pop: ' + eventPopFilter.current);
+    switch (true) {
+      case searchEventText.current !== '' &&
+        eventTagFilter.current !== '' &&
+        eventPopFilter.current !== '':
+        filteredArray = filteredEvents.filter((v) =>
+          v.title.toLowerCase().includes(searchEventText.current.toLowerCase())
+        );
+        filteredArray = filteredArray.filter((t) =>
+          t.tags.includes(eventTagFilter.current)
+        );
+        filteredArray = filteredArray.filter((p) =>
+          p.population.includes(eventPopFilter.current)
+        );
+        setFilteredEvents(filteredArray);
+        break;
+      case searchEventText.current !== '' && eventTagFilter.current !== '':
+        filteredArray = filteredEvents.filter((v) =>
+          v.title.toLowerCase().includes(searchEventText.current.toLowerCase())
+        );
+        filteredArray = filteredArray.filter((t) =>
+          t.tags.includes(eventTagFilter.current)
+        );
+        setFilteredEvents(filteredArray);
+        break;
+      case searchEventText.current !== '' && eventPopFilter.current !== '':
+        filteredArray = filteredEvents.filter((v) =>
+          v.title.toLowerCase().includes(searchEventText.current.toLowerCase())
+        );
+        filteredArray = filteredArray.filter((p) =>
+          p.population.includes(eventPopFilter.current)
+        );
+        setFilteredEvents(filteredArray);
+        break;
+      case eventTagFilter.current !== '' && eventPopFilter.current !== '':
+        filteredArray = filteredEvents.filter((t) =>
+          t.tags.includes(eventTagFilter.current)
+        );
+        filteredArray = filteredArray.filter((p) =>
+          p.population.includes(eventPopFilter.current)
+        );
+        setFilteredEvents(filteredArray);
+        break;
+      case searchEventText.current !== '':
+        setFilteredEvents(
+          events.filter((v) =>
+            v.title
+              .toLowerCase()
+              .includes(searchEventText.current.toLowerCase())
+          )
+        );
+        break;
+      case eventTagFilter.current !== '':
+        setFilteredEvents(
+          events.filter((t) => t.tags.includes(eventTagFilter.current))
+        );
+        break;
+      case eventPopFilter.current !== '':
+        setFilteredEvents(
+          events.filter((p) => p.population.includes(eventPopFilter.current))
+        );
+        break;
+      default:
+        setFilteredEvents(events);
+        break;
+    }
+  };
+
+  // Set featured text
+  const featuredTextQuery = query(doc(db, 'Featured-Texts', 'EventsPage'));
+  const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
+    setFeaturedEventText(textSnapshot.data().Text);
+  });
 
   const handleCloseEventModal = () => setShowEventModal(false);
   const handleShowEventModal = (e) => {
@@ -66,6 +171,18 @@ function Events() {
         endDate.toLocaleDateString(localizer, { dateStyle: 'long' })
       );
     }
+    if (
+      startDate.toDateString() !== endDate.toDateString() &&
+      startDate.toTimeString() ===
+        '00:00:00 GMT-0500 (Eastern Standard Time)' &&
+      endDate.toTimeString() === '00:00:00 GMT-0500 (Eastern Standard Time)'
+    ) {
+      return (
+        startDate.toLocaleDateString(localizer, { dateStyle: 'long' }) +
+        ' to ' +
+        endDate.toLocaleDateString(localizer, { dateStyle: 'long' })
+      );
+    }
     // if 1 day event, don't display end date
     else if (startDate.toDateString() === endDate.toDateString()) {
       return (
@@ -90,17 +207,54 @@ function Events() {
     }
   };
 
-  // filter statements
-  if (searchEventText !== "") {
-    events = events.filter(e => e.title.toLowerCase().includes(searchEventText.toLowerCase()));
-  }
-  if (eventPopFilter !== "") {
-    events = events.filter(p => p.population.includes(eventPopFilter));
-  }
-
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
+  }, []);
+
+  // Set list of events
+  useEffect(() => {
+    const eventList = collection(db, 'Events');
+    let eventsArray = [];
+    const eventsSnapshot = getDocs(eventList).then((eventsSnapshot) => {
+      eventsSnapshot.forEach((doc) => {
+        let data = doc.data();
+        eventsArray.push({
+          description: data.description,
+          end: data.end.toDate(),
+          eventHost: data.eventHost,
+          eventLink: data.eventLink,
+          hostPhone: data.hostPhone,
+          id: data.id,
+          location: data.location,
+          population: data.population,
+          start: data.start.toDate(),
+          tags: data.tags,
+          title: data.title,
+        });
+      });
+      setEvents(eventsArray);
+      setFilteredEvents(eventsArray);
+      console.log(eventsArray);
+    });
+  }, []);
+
+  // Set population filters list
+  useEffect(() => {
+    const populationFilterQuery = query(doc(db, 'Filters', 'Populations'));
+    const populationsSnapshot = getDoc(populationFilterQuery).then(
+      (populationsSnapshot) => {
+        setPopulationFilters(populationsSnapshot.data().filters.sort());
+      }
+    );
+  }, []);
+
+  // Set tag filters list
+  useEffect(() => {
+    const tagsFilterQuery = query(doc(db, 'Filters', 'EventTags'));
+    const tagsSnapshot = getDoc(tagsFilterQuery).then((tagsSnapshot) => {
+      setTagFilters(tagsSnapshot.data().tags.sort());
+    });
   }, []);
 
   return (
@@ -111,14 +265,7 @@ function Events() {
           <Col>
             <h4>Featured Events and Announcements</h4>
             <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
-              <p>
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-                eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut
-                enim ad minim veniam, quis nostrud exercitation ullamco laboris
-                nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor
-                in reprehenderit in voluptate velit esse cillum dolore eu fugiat
-                nulla pariatur.
-              </p>
+              <p>{featuredEventText}</p>
             </div>
           </Col>
         </Row>
@@ -128,41 +275,69 @@ function Events() {
             <h5 className="mt-2">Filter Events: </h5>
           </Col>
           {/* text search feature */}
-          <Col md='4' className='p-2'>
+          <Col md="4" className="p-2">
             <Form.Control
               type="text"
               className="text-filter-form"
-              value={searchEventText}
-              onChange={(e) => setSearchEventText(e.target.value)}
-              placeholder="Filter Events by Name"
+              value={searchEventText.current}
+              onChange={(e) => updateEventSearchText(e.target.value)}
+              placeholder="Search Events by Name"
             />
           </Col>
           {/* Population filter */}
-          <Col md='auto' className='p-2'>
+          <Col md="auto" className="p-2">
             <DropdownButton
               variant="secondary"
               id="population-filter-dropdown"
               title="Population"
-              onSelect={(f) => setEventPopFilter(f)}
+              onSelect={(f) => updateEventPopFilter(f)}
             >
               {populationFilters.map((f) => (
                 <Dropdown.Item eventKey={f}>{f}</Dropdown.Item>
               ))}
             </DropdownButton>
           </Col>
+          {/* Tag filter */}
+          <Col md="auto" className="p-2">
+            <DropdownButton
+              variant="secondary"
+              id="tag-filter-dropdown"
+              title="Event Tag"
+              onSelect={(f) => updateEventTagFilter(f)}
+            >
+              {tagFilters.map((t) => (
+                <Dropdown.Item eventKey={t}>{t}</Dropdown.Item>
+              ))}
+            </DropdownButton>
+          </Col>
           {/* Show selected filters */}
-          {(eventPopFilter !== '') ? (
-            <Col md='auto' className='p-2'>
-              <Button variant='outline-secondary' onClick={(e) => setEventPopFilter('')}>{eventPopFilter} | X</Button>
+          {eventPopFilter.current !== '' ? (
+            <Col md="auto" className="p-2">
+              <Button
+                variant="outline-secondary"
+                onClick={(e) => updateEventPopFilter('')}
+              >
+                {eventPopFilter.current} | X
+              </Button>
             </Col>
-          ): null}
+          ) : null}
+          {eventTagFilter.current !== '' ? (
+            <Col md="auto" className="p-2">
+              <Button
+                variant="outline-secondary"
+                onClick={(e) => updateEventTagFilter('')}
+              >
+                {eventTagFilter.current} | X
+              </Button>
+            </Col>
+          ) : null}
         </Row>
         <Row className="event-calendar">
           <Col>
             <Calendar
               localizer={localizer}
               showMultiDayTimes
-              events={events}
+              events={filteredEvents}
               onSelectEvent={(e) => handleShowEventModal(e)}
               views={['month', 'week', 'day']}
               popup
@@ -184,7 +359,7 @@ function Events() {
               Location: {event.location}
             </Card.Text>
             <Card.Text>{event.description}</Card.Text>
-            {(event.population !== '') ? (
+            {event.population !== '' ? (
               <>
                 <h5>Populations:</h5>
                 <ListGroup horizontal className="m-1">
