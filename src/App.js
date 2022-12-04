@@ -10,6 +10,7 @@ import About from './components/about/about';
 import Events from './components/events/events';
 import Resources from './components/resources/resources';
 import './App.css';
+import Admin from './components/admin/admin';
 
 function App() {
   return (
@@ -20,6 +21,7 @@ function App() {
           <Route path="/" element={<Resources />} />
           <Route path="/about" element={<About />} />
           <Route path="/events" element={<Events />} />
+          <Route path="/admin" element={<Admin />} />
         </Routes>
       </div>
       <Footer className='footer' />

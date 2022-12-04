@@ -23,6 +23,9 @@ function NavMenu() {
             <Nav.Link eventKey='3' as={Link} to="/about">
               About
             </Nav.Link>
+            <Nav.Link eventKey='4' as={Link} to="/admin">
+              Admin
+            </Nav.Link>
           </Nav>
         </Navbar.Collapse>
       </Container>
