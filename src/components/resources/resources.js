@@ -8,8 +8,10 @@ import DropdownButton from 'react-bootstrap/DropdownButton';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
+import Alert from 'react-bootstrap/Alert';
 import ResourceCard from '../resource-card/resource-card';
 import SuccessModal from '../success-modal/success-modal';
+import uuid from 'react-uuid';
 import {
   query,
   orderBy,
@@ -17,11 +19,10 @@ import {
   doc,
   getDocs,
   getDoc,
-  onSnapshot,
+  addDoc,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './resources.css';
-import { async } from '@firebase/util';
 
 function Resources() {
   const [open, setOpen] = useState(false);
@@ -30,6 +31,14 @@ function Resources() {
   const [resourcesList, setResourcesList] = useState([]);
   const [filteredResources, setFilteredResources] = useState([]);
   const [featuredResourcesText, setFeaturedResourcesText] = useState('');
+  const [displayFeaturedResourcesText, setDisplayFeaturedResourcesText] = useState(false);
+  // for new resource form
+  const [formResourceIdentifier, setFormResourceIdentifier] = useState('');
+  const [formResourceProvider, setFormResourceProvider] = useState('');
+  const [formResourceAddress, setFormResourceAddress] = useState('');
+  const [formResourcePhone, setFormResourcePhone] = useState('');
+  const [formResourceWebsite, setFormResourceWebsite] = useState('');
+  const [formResourceDescription, setFormResourceDescription] = useState('');
   // for dropdown lists of filters
   const [programFilters, setProgramFilters] = useState([]);
   const [populationFilters, setPopulationFilters] = useState([]);
@@ -58,6 +67,7 @@ function Resources() {
   const featuredTextQuery = query(doc(db, 'Featured-Texts', 'ResourcePage'));
   const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
     setFeaturedResourcesText(textSnapshot.data().Text);
+    setDisplayFeaturedResourcesText(textSnapshot.data().display);
   });
 
   // Methods for opening & closing modals
@@ -68,8 +78,19 @@ function Resources() {
   const handleShowSuccessModal = () => setShowSuccessModal(true);
 
   const handleSubmitandClose = () => {
-    handleCloseNewResourceModal();
-    handleShowSuccessModal();
+    const newResourceRef = addDoc(collection(db, 'Resource-Requests'), {
+      description: formResourceDescription,
+      id: uuid(),
+      identifier: formResourceIdentifier,
+      phone: formResourcePhone,
+      provider: formResourceProvider,
+      address: formResourceAddress,
+      website: formResourceWebsite || null,
+      read: false,
+    }).then(() => {
+      handleCloseNewResourceModal();
+      handleShowSuccessModal();
+    });    
   };
 
   // filter statements
@@ -180,14 +201,17 @@ function Resources() {
     <Fade in={open}>
       <Container className="resources">
         <h2>Resources</h2>
-        <Row>
-          <Col>
-            <h4>Featured Programs and Announcements</h4>
-            <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
-              <p>{featuredResourcesText}</p>
-            </div>
-          </Col>
-        </Row>
+        {displayFeaturedResourcesText ? (
+          <Row>
+            <Col>
+              <h4>Featured Programs and Announcements</h4>
+              {/* <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
+                <p>{featuredResourcesText}</p>
+              </div> */}
+              <Alert variant='secondary'>{featuredResourcesText}</Alert>
+            </Col>
+          </Row>  
+        ) : null}
         <Row className="mt-3 mb-3">
           <Col md="auto">
             <h5 className="mt-2">Search and Filter: </h5>
@@ -291,39 +315,45 @@ function Resources() {
                   required
                   type="radio"
                   label="Community Member"
+                  value="Community Member"
                   name="newResourceFormRadios"
                   id="newResourceFormRadios1"
+                  onChange={(e) => setFormResourceIdentifier(e.target.value)}
                 />
                 <Form.Check
                   required
                   type="radio"
                   label="Employee of this Provider"
+                  value="Employee of this Provider"
                   name="newResourceFormRadios"
                   id="newResourceFormRadios2"
+                  onChange={(e) => setFormResourceIdentifier(e.target.value)}
                 />
                 <Form.Check
                   required
                   type="radio"
                   label="Employee of another Provider"
+                  value="Employee of another Provider"
                   name="newResourceFormRadios"
                   id="newResourceFormRadios3"
+                  onChange={(e) => setFormResourceIdentifier(e.target.value)}
                 />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Provider">
                 <Form.Label>Resource Provider Name:</Form.Label>
-                <Form.Control type="text" required />
+                <Form.Control type="text" value={formResourceProvider} onChange={(e) => setFormResourceProvider(e.target.value)} required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Address">
                 <Form.Label>Address:</Form.Label>
-                <Form.Control type="text" required />
+                <Form.Control type="text" value={formResourceAddress} onChange={(e) => setFormResourceAddress(e.target.value)} required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Phone">
                 <Form.Label>Phone:</Form.Label>
-                <Form.Control type="text" required />
+                <Form.Control type="tel" value={formResourcePhone} onChange={(e) => setFormResourcePhone(e.target.value)} required />
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Website">
                 <Form.Label>Website Link (optional):</Form.Label>
-                <Form.Control type="text" />
+                <Form.Control type="url" value={formResourceWebsite} onChange={(e) => setFormResourceWebsite(e.target.value)} />
               </Form.Group>
               <Form.Group
                 className="mb-3"
@@ -332,7 +362,7 @@ function Resources() {
                 <Form.Label>
                   Provide a short description of the resource.
                 </Form.Label>
-                <Form.Control required as="textarea" rows={3} />
+                <Form.Control required as="textarea" rows={3} value={formResourceDescription} onChange={(e) => setFormResourceDescription(e.target.value)} />
               </Form.Group>
             </Form>
           </Modal.Body>

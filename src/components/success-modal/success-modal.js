@@ -3,7 +3,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 
 function SuccessModal(props) {
-  const { showSuccessModal, handleCloseSuccessModal} = props;
+  const { showSuccessModal, handleCloseSuccessModal } = props;
 
   return (
     <Modal show={showSuccessModal} onHide={handleCloseSuccessModal}>

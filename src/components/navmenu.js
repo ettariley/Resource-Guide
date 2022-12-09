@@ -2,9 +2,18 @@ import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 
-function NavMenu() {
+function NavMenu(props) {
+  const { loggedIn, setLoggedIn } = props;
+  const navigate = useNavigate();
+
+  const logOutAdmin = () => {
+    setLoggedIn(false);
+    localStorage.removeItem('loggedIn');
+    navigate("/");
+  };
+
   return (
     <Navbar collapseOnSelect fixed="top" variant="dark" bg="secondary" expand="md">
       <Container>
@@ -23,9 +32,16 @@ function NavMenu() {
             <Nav.Link eventKey='3' as={Link} to="/about">
               About
             </Nav.Link>
-            <Nav.Link eventKey='4' as={Link} to="/admin">
-              Admin
-            </Nav.Link>
+            {(localStorage.getItem('loggedIn')) ? (
+              <Nav.Link eventKey='4' as={Link} to="/admin">
+                Admin
+              </Nav.Link>
+            ) : null}
+            {(localStorage.getItem('loggedIn')) ? (
+              <Nav.Link className='link-danger' eventKey='5' onClick={() => logOutAdmin()}>
+                Log Out
+              </Nav.Link>
+            ) : null}
           </Nav>
         </Navbar.Collapse>
       </Container>

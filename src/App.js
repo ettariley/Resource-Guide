@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Routes,
   Route,
@@ -11,17 +11,23 @@ import Events from './components/events/events';
 import Resources from './components/resources/resources';
 import './App.css';
 import Admin from './components/admin/admin';
+import Login from './components/login/login';
 
 function App() {
+
+  // Login state
+  const [loggedIn, setLoggedIn] = useState(false);
+
   return (
     <Container fluid className="App d-flex flex-column justify-content-between">
       <div>
-        <NavMenu />
+        <NavMenu loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
         <Routes>
           <Route path="/" element={<Resources />} />
           <Route path="/about" element={<About />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/admin" element={<Admin />} />
+          <Route path="/admin" element={<Admin loggedIn={loggedIn} />} />
+          <Route path="/login" element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />} />
         </Routes>
       </div>
       <Footer className='footer' />
