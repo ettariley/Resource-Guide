@@ -5,11 +5,15 @@ import Card from 'react-bootstrap/Card';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Badge from 'react-bootstrap/Badge';
+import Button from 'react-bootstrap/Button';
+// import Modal from 'react-bootstrap/Modal';
 import { useNavigate } from 'react-router-dom';
-import { Button } from 'react-bootstrap';
 import { useAtom } from 'jotai';
 import { programFiltersAtom, programsLengthAtom, currentFilterListAtom, currentFilterTypeAtom } from '../../atoms';
 import FilterModal from '../resources/filter-modal';
+import EditResourceRequests from './edit-resource-requests';
+import ResourceRequests from './resource-requests';
+import EventRequests from './event-requests';
 import { query, doc, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 
