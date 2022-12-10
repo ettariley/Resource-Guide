@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { Formik, Field } from 'formik';
 import uuid from 'react-uuid';
-import DateTimePicker from 'react-datetime-picker';
+import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle';
 import { collection, addDoc } from 'firebase/firestore';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -68,6 +68,7 @@ function NewEventForm(props) {
       default:
         break;
     }
+    console.log(errors);
   };
 
   const findFormErrors = () => {
@@ -82,16 +83,16 @@ function NewEventForm(props) {
     if (!newEventName || newEventName === '') {
       newErrors.newEventName = 'Required';
     }
-    // if (!newEventStart || newEventStart === '') {
-    //   newErrors.newEventStart = 'Required';
-    // } else if (newEventStart < new Date()) {
-    //   newErrors.newEventStart = 'Date must be in the future.'
-    // }
-    // if (!newEventEnd || newEventEnd === '') {
-    //   newErrors.newEventEnd = 'Required';
-    // } else if (newEventEnd < new Date() || newEventEnd < newEventStart) {
-    //   newErrors.newEventEnd = 'Date must be in the future and after the start date.'
-    // }
+    if (!newEventStart) {
+      newErrors.newEventStart = 'Required';
+    } else if (newEventStart <= new Date()) {
+      newErrors.newEventStart = 'Date must be in the future.'
+    }
+    if (!newEventEnd) {
+      newErrors.newEventEnd = 'Required';
+    } else if (newEventEnd <= new Date() || newEventEnd <= newEventStart) {
+      newErrors.newEventEnd = 'Date/Time must be after the start date.'
+    }
     if (!newEventAddress || newEventAddress === '') {
       newErrors.newEventAddress = 'Required';
     }
@@ -185,37 +186,46 @@ function NewEventForm(props) {
         </Form.Control.Feedback>
       </Form.Group>
       <Row className="mb-3">
-        <Form.Group as={Col} controlId="newEventForm.StartDate">
-          <Form.Label>Event Start:</Form.Label>
-          <DateTimePicker
-            required
-            disableClock
-            name="newEventStart"
-            value={newEventStart}
-            isInvalid={errors.newEventStart}
-            onChange={setNewEventStart}
-          />
+        <Form.Group as={Col} controlId="newEventForm.StartDate" className=''>
+            <Form.Label>Event Start:</Form.Label>
+            <p className='mb-1'>
+              <DateTimePicker
+                required
+                disableClock
+                name="newEventStart"
+                value={newEventStart}
+                // isInvalid={errors.newEventStart}
+                onChange={(datetime) => onFormChange('start', datetime)}
+              />
+            </p>          
           <Form.Text muted>(set time to 12:00 AM if all day event)</Form.Text>
-          <Form.Control.Feedback type="invalid">
-            {errors.newEventStart}
-          </Form.Control.Feedback>
+          {errors.newEventStart !== '' ? (
+            <p className='text-danger' style={{fontSize: '0.875em'}}>
+              {errors.newEventStart}
+            </p>
+          ) : null}
         </Form.Group>
       </Row>
       <Row className="mb-3">
         <Form.Group as={Col} controlId="newEventForm.EndDate">
           <Form.Label>Event End:</Form.Label>
-          <DateTimePicker
-            required
-            disableClock
-            name="newEventEnd"
-            value={newEventEnd}
-            isInvalid={errors.newEventEnd}
-            onChange={setNewEventEnd}
-          />
+          <p className='mb-1'>
+            <DateTimePicker
+              required
+              disableClock
+              name="newEventEnd"
+              value={newEventEnd}
+              // isInvalid={errors.newEventEnd}
+              onChange={setNewEventEnd}
+              className=''
+            />
+          </p>
           <Form.Text muted>(set time to 11:59 PM if all day event)</Form.Text>
-          <Form.Control.Feedback type="invalid">
-            {errors.newEventEnd}
-          </Form.Control.Feedback>
+          {errors.newEventEnd !== null ? (
+            <p className='text-danger' style={{fontSize: '0.875em'}}>
+              {errors.newEventEnd}
+            </p>
+          ) : null}
         </Form.Group>
       </Row>
       <Form.Group className="mb-3" controlId="newEventForm.Address">

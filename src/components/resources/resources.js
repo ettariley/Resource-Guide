@@ -31,7 +31,8 @@ function Resources() {
   const [resourcesList, setResourcesList] = useState([]);
   const [filteredResources, setFilteredResources] = useState([]);
   const [featuredResourcesText, setFeaturedResourcesText] = useState('');
-  const [displayFeaturedResourcesText, setDisplayFeaturedResourcesText] = useState(false);
+  const [displayFeaturedResourcesText, setDisplayFeaturedResourcesText] =
+    useState(false);
   // for new resource form
   const [formResourceIdentifier, setFormResourceIdentifier] = useState('');
   const [formResourceProvider, setFormResourceProvider] = useState('');
@@ -39,6 +40,7 @@ function Resources() {
   const [formResourcePhone, setFormResourcePhone] = useState('');
   const [formResourceWebsite, setFormResourceWebsite] = useState('');
   const [formResourceDescription, setFormResourceDescription] = useState('');
+  const [errors, setErrors] = useState({});
   // for dropdown lists of filters
   const [programFilters, setProgramFilters] = useState([]);
   const [populationFilters, setPopulationFilters] = useState([]);
@@ -77,66 +79,170 @@ function Resources() {
   const handleCloseSuccessModal = () => setShowSuccessModal(false);
   const handleShowSuccessModal = () => setShowSuccessModal(true);
 
-  const handleSubmitandClose = () => {
-    const newResourceRef = addDoc(collection(db, 'Resource-Requests'), {
-      description: formResourceDescription,
-      id: uuid(),
-      identifier: formResourceIdentifier,
-      phone: formResourcePhone,
-      provider: formResourceProvider,
-      address: formResourceAddress,
-      website: formResourceWebsite || null,
-      read: false,
-    }).then(() => {
-      handleCloseNewResourceModal();
-      handleShowSuccessModal();
-    });    
+  
+
+  const onResourceFormChange = (type, value) => {
+    switch (type) {
+      case 'identifier':
+        setFormResourceIdentifier(value);
+        if (!errors[formResourceIdentifier])
+          setErrors({ ...errors, formResourceIdentifier: null });
+        break;
+      case 'provider':
+        setFormResourceProvider(value);
+        if (!errors[formResourceProvider])
+          setErrors({ ...errors, formResourceProvider: null });
+        break;
+      case 'address':
+        setFormResourceAddress(value);
+        if (!errors[formResourceAddress])
+          setErrors({ ...errors, formResourceAddress: null });
+        break;
+      case 'phone':
+        setFormResourcePhone(value);
+        if (!errors[formResourcePhone])
+          setErrors({ ...errors, formResourcePhone: null });
+        break;
+      case 'website':
+        setFormResourceWebsite(value);
+        if (!errors[formResourceWebsite])
+          setErrors({ ...errors, formResourceWebsite: null });
+        break;
+      case 'description':
+        setFormResourceDescription(value);
+        if (!errors[formResourceDescription])
+          setErrors({ ...errors, formResourceDescription: null });
+        break;
+      default:
+        break;
+    }
+  };
+
+  const findFormErrors = () => {
+    const newErrors = {};
+    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    if (!formResourceIdentifier || formResourceIdentifier === '') {
+      newErrors.formResourceIdentifier = 'Required';
+    }
+    if (!formResourceProvider || formResourceProvider === '') {
+      newErrors.formResourceProvider = 'Required';
+    }
+    if (!formResourceAddress || formResourceAddress === '') {
+      newErrors.formResourceAddress = 'Required';
+    }
+    if (!formResourcePhone || formResourcePhone === '') {
+      newErrors.formResourcePhone = 'Required';
+    } else if (formResourcePhone !== '' && !formResourcePhone.match(phoneno)) {
+      newErrors.formResourcePhone =
+        'Phone number should be in 123-456-7890 or 123.456.7890 format.';
+    }
+    if (!formResourceDescription || formResourceDescription === '') {
+      newErrors.formResourceDescription = 'Required';
+    }
+
+    return newErrors;
+  };
+
+  const clearFormFields = () => {
+    setFormResourceIdentifier('');
+    setFormResourceAddress('');
+    setFormResourceDescription('');
+    setFormResourcePhone('');
+    setFormResourceProvider('');
+    setFormResourceWebsite('');
+  };
+
+  const handleSubmitandClose = (e) => {
+    e.preventDefault();
+    const newErrors = findFormErrors();
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+    } else {
+      const newResourceRef = addDoc(collection(db, 'Resource-Requests'), {
+        description: formResourceDescription,
+        id: uuid(),
+        identifier: formResourceIdentifier,
+        phone: formResourcePhone,
+        provider: formResourceProvider,
+        address: formResourceAddress,
+        website: formResourceWebsite || null,
+        read: false,
+      }).then(() => {
+        handleCloseNewResourceModal();
+        handleShowSuccessModal();
+        clearFormFields();
+      });
+    }
   };
 
   // filter statements
   const filterResources = () => {
-    console.log("text: " + searchText.current);
-    console.log("prog: " + progFilter.current);
-    console.log("pop: " + popFilter.current);
+    console.log('text: ' + searchText.current);
+    console.log('prog: ' + progFilter.current);
+    console.log('pop: ' + popFilter.current);
     switch (true) {
-      case (searchText.current !== '' && progFilter.current !== '' && popFilter.current !== ''):
+      case searchText.current !== '' &&
+        progFilter.current !== '' &&
+        popFilter.current !== '':
         filteredArray = filteredResources.filter((r) =>
           r.provider.toLowerCase().includes(searchText.current.toLowerCase())
         );
-        filteredArray = filteredArray.filter((s) => s.serviceFilters.includes(progFilter.current));
-        filteredArray = filteredArray.filter((p) => p.populationFilters.includes(popFilter.current));
+        filteredArray = filteredArray.filter((s) =>
+          s.serviceFilters.includes(progFilter.current)
+        );
+        filteredArray = filteredArray.filter((p) =>
+          p.populationFilters.includes(popFilter.current)
+        );
         setFilteredResources(filteredArray);
         break;
-      case (searchText.current !== '' && progFilter.current !== ''):
+      case searchText.current !== '' && progFilter.current !== '':
         filteredArray = filteredResources.filter((r) =>
           r.provider.toLowerCase().includes(searchText.current.toLowerCase())
         );
-        filteredArray = filteredArray.filter((s) => s.serviceFilters.includes(progFilter.current));
+        filteredArray = filteredArray.filter((s) =>
+          s.serviceFilters.includes(progFilter.current)
+        );
         setFilteredResources(filteredArray);
         break;
-      case (searchText.current !== '' && popFilter.current !== ''):
+      case searchText.current !== '' && popFilter.current !== '':
         filteredArray = filteredResources.filter((r) =>
           r.provider.toLowerCase().includes(searchText.current.toLowerCase())
         );
-        filteredArray = filteredArray.filter((p) => p.populationFilters.includes(popFilter.current));
+        filteredArray = filteredArray.filter((p) =>
+          p.populationFilters.includes(popFilter.current)
+        );
         setFilteredResources(filteredArray);
         break;
-      case (progFilter.current !== '' && popFilter.current !== ''):
-        filteredArray = filteredResources.filter((s) => s.serviceFilters.includes(progFilter.current));
-        filteredArray = filteredArray.filter((p) => p.populationFilters.includes(popFilter.current));
+      case progFilter.current !== '' && popFilter.current !== '':
+        filteredArray = filteredResources.filter((s) =>
+          s.serviceFilters.includes(progFilter.current)
+        );
+        filteredArray = filteredArray.filter((p) =>
+          p.populationFilters.includes(popFilter.current)
+        );
         setFilteredResources(filteredArray);
         break;
-      case (searchText.current !== ''):
+      case searchText.current !== '':
         setFilteredResources(
           resourcesList.filter((r) =>
             r.provider.toLowerCase().includes(searchText.current.toLowerCase())
-        ));
+          )
+        );
         break;
-      case (progFilter.current !== ''):
-        setFilteredResources(resourcesList.filter((s) => s.serviceFilters.includes(progFilter.current)));
+      case progFilter.current !== '':
+        setFilteredResources(
+          resourcesList.filter((s) =>
+            s.serviceFilters.includes(progFilter.current)
+          )
+        );
         break;
-      case (popFilter.current !== ''):
-        setFilteredResources(resourcesList.filter((p) => p.populationFilters.includes(popFilter.current)));
+      case popFilter.current !== '':
+        setFilteredResources(
+          resourcesList.filter((p) =>
+            p.populationFilters.includes(popFilter.current)
+          )
+        );
         break;
       default:
         setFilteredResources(resourcesList);
@@ -208,9 +314,9 @@ function Resources() {
               {/* <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
                 <p>{featuredResourcesText}</p>
               </div> */}
-              <Alert variant='secondary'>{featuredResourcesText}</Alert>
+              <Alert variant="secondary">{featuredResourcesText}</Alert>
             </Col>
-          </Row>  
+          </Row>
         ) : null}
         <Row className="mt-3 mb-3">
           <Col md="auto">
@@ -305,20 +411,22 @@ function Resources() {
             </Modal.Title>
           </Modal.Header>
           <Modal.Body className="text-bg-light">
-            <Form>
+            <Form noValidate>
               <Form.Group
                 className="mb-3"
                 controlId="newResourceForm.Identifier"
               >
                 <Form.Label>I am a...</Form.Label>
                 <Form.Check
-                  required
                   type="radio"
                   label="Community Member"
                   value="Community Member"
                   name="newResourceFormRadios"
                   id="newResourceFormRadios1"
-                  onChange={(e) => setFormResourceIdentifier(e.target.value)}
+                  isInvalid={errors.formResourceIdentifier}
+                  onChange={(e) =>
+                    onResourceFormChange('identifier', e.target.value)
+                  }
                 />
                 <Form.Check
                   required
@@ -327,7 +435,10 @@ function Resources() {
                   value="Employee of this Provider"
                   name="newResourceFormRadios"
                   id="newResourceFormRadios2"
-                  onChange={(e) => setFormResourceIdentifier(e.target.value)}
+                  isInvalid={errors.formResourceIdentifier}
+                  onChange={(e) =>
+                    onResourceFormChange('identifier', e.target.value)
+                  }
                 />
                 <Form.Check
                   required
@@ -336,24 +447,66 @@ function Resources() {
                   value="Employee of another Provider"
                   name="newResourceFormRadios"
                   id="newResourceFormRadios3"
-                  onChange={(e) => setFormResourceIdentifier(e.target.value)}
+                  isInvalid={errors.formResourceIdentifier}
+                  onChange={(e) =>
+                    onResourceFormChange('identifier', e.target.value)
+                  }
                 />
+                <Form.Control.Feedback type="invalid">
+                  {errors.formResourceIdentifier}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Provider">
                 <Form.Label>Resource Provider Name:</Form.Label>
-                <Form.Control type="text" value={formResourceProvider} onChange={(e) => setFormResourceProvider(e.target.value)} required />
+                <Form.Control
+                  type="text"
+                  value={formResourceProvider}
+                  isInvalid={errors.formResourceProvider}
+                  onChange={(e) =>
+                    onResourceFormChange('provider', e.target.value)
+                  }
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.formResourceProvider}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Address">
                 <Form.Label>Address:</Form.Label>
-                <Form.Control type="text" value={formResourceAddress} onChange={(e) => setFormResourceAddress(e.target.value)} required />
+                <Form.Control
+                  type="text"
+                  value={formResourceAddress}
+                  isInvalid={errors.formResourceAddress}
+                  onChange={(e) =>
+                    onResourceFormChange('address', e.target.value)
+                  }
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.formResourceAddress}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Phone">
                 <Form.Label>Phone:</Form.Label>
-                <Form.Control type="tel" value={formResourcePhone} onChange={(e) => setFormResourcePhone(e.target.value)} required />
+                <Form.Control
+                  type="tel"
+                  value={formResourcePhone}
+                  isInvalid={errors.formResourcePhone}
+                  onChange={(e) =>
+                    onResourceFormChange('phone', e.target.value)
+                  }
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.formResourcePhone}
+                </Form.Control.Feedback>
               </Form.Group>
               <Form.Group className="mb-3" controlId="newResourceForm.Website">
                 <Form.Label>Website Link (optional):</Form.Label>
-                <Form.Control type="url" value={formResourceWebsite} onChange={(e) => setFormResourceWebsite(e.target.value)} />
+                <Form.Control
+                  type="url"
+                  value={formResourceWebsite}
+                  onChange={(e) =>
+                    onResourceFormChange('website', e.target.value)
+                  }
+                />
               </Form.Group>
               <Form.Group
                 className="mb-3"
@@ -362,7 +515,18 @@ function Resources() {
                 <Form.Label>
                   Provide a short description of the resource.
                 </Form.Label>
-                <Form.Control required as="textarea" rows={3} value={formResourceDescription} onChange={(e) => setFormResourceDescription(e.target.value)} />
+                <Form.Control
+                  as="textarea"
+                  rows={3}
+                  value={formResourceDescription}
+                  isInvalid={errors.formResourcePhone}
+                  onChange={(e) =>
+                    onResourceFormChange('description', e.target.value)
+                  }
+                />
+                <Form.Control.Feedback type="invalid">
+                  {errors.formResourceDescription}
+                </Form.Control.Feedback>
               </Form.Group>
             </Form>
           </Modal.Body>
