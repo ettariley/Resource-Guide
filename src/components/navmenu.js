@@ -1,16 +1,20 @@
+import { signOut } from 'firebase/auth';
 import React from 'react';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
+import NavDropdown from 'react-bootstrap/NavDropdown';
 import { Link, useNavigate } from 'react-router-dom';
+import { auth } from '../firebase';
 
 function NavMenu(props) {
   const { loggedIn, setLoggedIn } = props;
   const navigate = useNavigate();
 
   const logOutAdmin = () => {
-    setLoggedIn(false);
-    localStorage.removeItem('loggedIn');
+    signOut(auth);
+    // setLoggedIn(false);
+    sessionStorage.removeItem('Auth Token');
     navigate("/");
   };
 
@@ -32,15 +36,11 @@ function NavMenu(props) {
             <Nav.Link eventKey='3' as={Link} to="/about">
               About
             </Nav.Link>
-            {(localStorage.getItem('loggedIn')) ? (
-              <Nav.Link eventKey='4' as={Link} to="/admin">
-                Admin
-              </Nav.Link>
-            ) : null}
-            {(localStorage.getItem('loggedIn')) ? (
-              <Nav.Link className='link-danger' eventKey='5' onClick={() => logOutAdmin()}>
-                Log Out
-              </Nav.Link>
+            {(sessionStorage.getItem('Auth Token')) ? (
+              <NavDropdown title='Admin' id='admin-dropdown'>
+                <NavDropdown.Item eventKey='4' as={Link} to="/admin">Dashboard</NavDropdown.Item>
+                <NavDropdown.Item  className='link-danger' eventKey='5' onClick={() => logOutAdmin()}>Log Out</NavDropdown.Item>
+              </NavDropdown>
             ) : null}
           </Nav>
         </Navbar.Collapse>
