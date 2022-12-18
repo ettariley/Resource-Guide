@@ -1,0 +1,23 @@
+.request-body {
+  background-color: #bec3c7;
+  color: #0a141a;
+}
+
+.sort-filter {
+  background-color: #e9ecee;
+  color: #152834;
+}
+
+.edit-selected {
+  background-color: #d3d9dd;
+  color: #152834;
+}
+
+.requests-list-col {
+  background-color: #bdc6cd;
+}
+
+.list-group-item-primary.list-group-item-action.active {
+  background-color: #b8d1ce;
+  color: #0a141a;
+}
