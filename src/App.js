@@ -12,22 +12,33 @@ import Resources from './components/resources/resources';
 import './App.css';
 import Admin from './components/admin/admin';
 import Login from './components/login/login';
+import EditResourceRequests from './components/admin/edit-resource-requests';
+import EventRequests from './components/admin/event-requests';
+import ResourceRequests from './components/admin/resource-requests';
+import AddEvent from './components/admin/add-event';
+import EditEvent from './components/admin/edit-event';
+import AddResource from './components/admin/add-resource';
+import EditResource from './components/admin/edit-resource';
 
 function App() {
-
-  // Login state
-  const [loggedIn, setLoggedIn] = useState(false);
 
   return (
     <Container fluid className="App d-flex flex-column justify-content-between">
       <div>
-        <NavMenu loggedIn={loggedIn} setLoggedIn={setLoggedIn} />
+        <NavMenu />
         <Routes>
           <Route path="/" element={<Resources />} />
           <Route path="/about" element={<About />} />
           <Route path="/events" element={<Events />} />
-          <Route path="/admin" element={<Admin loggedIn={loggedIn} />} />
-          <Route path="/login" element={<Login loggedIn={loggedIn} setLoggedIn={setLoggedIn} />} />
+          <Route path="/admin" element={<Admin />} />
+          <Route path='admin/edit-requests' element={<EditResourceRequests />} />
+          <Route path='admin/event-requests' element={<EventRequests />} />
+          <Route path='admin/resource-requests' element={<ResourceRequests />} />
+          <Route path='admin/add-event' element={<AddEvent />} />
+          <Route path='admin/edit-event' element={<EditEvent />} />
+          <Route path='admin/add-resource' element={<AddResource />} />
+          <Route path='admin/edit-resource' element={<EditResource />} />
+          <Route path="/login" element={<Login />} />
         </Routes>
       </div>
       <Footer className='footer' />
