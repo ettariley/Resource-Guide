@@ -115,6 +115,7 @@ function NewEventForm(props) {
       setErrors(newErrors);
     } else {
       const eventRequestRef = addDoc(collection(db, 'Event-Requests'), {
+        dateSubmitted: new Date(),
         id: uuid(),
         identifier: newEventIdentifier,
         hostPhone: newEventPhone || null,

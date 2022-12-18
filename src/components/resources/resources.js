@@ -160,6 +160,7 @@ function Resources() {
       setErrors(newErrors);
     } else {
       const newResourceRef = addDoc(collection(db, 'Resource-Requests'), {
+        dateSubmitted: new Date(),
         description: formResourceDescription,
         id: uuid(),
         identifier: formResourceIdentifier,

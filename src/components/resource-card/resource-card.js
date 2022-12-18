@@ -82,6 +82,7 @@ function ResourceCard(props) {
       setErrors(newErrors);
     } else {
       const editRequestRef = addDoc(collection(db, 'Edit-Requests'), {
+        dateSubmitted: new Date(),
         editRequest: formEditRequest,
         id: uuid(),
         identifier: formIdentifier,
