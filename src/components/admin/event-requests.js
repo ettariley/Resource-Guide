@@ -209,7 +209,10 @@ function EventRequests() {
               <p>Event Link: {selected.eventLink}</p>
             </>
           ) : (
-            <p>No message selected</p>
+            <div className='text-center text-muted pt-5'>
+              <h3><i class="bi bi-envelope-open"></i></h3>
+              <h3>No message selected</h3>
+            </div>
           )}
         </Col>
       </Row>
