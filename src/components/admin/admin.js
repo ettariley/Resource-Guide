@@ -168,28 +168,28 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
-          <Col className='mb-4 d-none'>
+          <Col className='mb-4'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Resources</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary">Add New Resource</Button>
+                  <Button variant="secondary" as={Link} to="add-resource">Add New Resource</Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary">Edit or Remove Resource</Button>
+                  <Button variant="secondary" as={Link} to="edit-resource">Edit or Remove Resource</Button>
                 </Card.Text>
               </Card.Body>
             </Card>
           </Col>
-          <Col className='mb-4 d-none'>
+          <Col className='mb-4'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Events</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary">Add New Event</Button>
+                  <Button variant="secondary" as={Link} to="add-event">Add New Event</Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary">Edit or Remove Event</Button>
+                  <Button variant="secondary" as={Link} to="edit-event">Edit or Remove Event</Button>
                 </Card.Text>
               </Card.Body>
             </Card>
