@@ -15,7 +15,7 @@ import {
   currentFilterListAtom,
   currentFilterTypeAtom,
 } from '../../atoms';
-import FilterModal from '../resources/filter-modal';
+import FilterModal from './filter-modal';
 import EditResourceRequests from './edit-resource-requests';
 import ResourceRequests from './resource-requests';
 import EventRequests from './event-requests';
