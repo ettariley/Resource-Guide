@@ -15,15 +15,12 @@ import Alert from 'react-bootstrap/Alert';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import SuccessModal from '../success-modal/success-modal';
-import uuid from 'react-uuid';
-import DateTimePicker from 'react-datetime-picker';
 import {
   query,
   collection,
   doc,
   getDocs,
   getDoc,
-  addDoc,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './events.css';
@@ -225,7 +222,7 @@ function Events() {
           eventHost: data.eventHost,
           eventLink: data.eventLink,
           hostPhone: data.hostPhone,
-          id: data.id,
+          id: doc.id,
           location: data.location,
           population: data.population,
           start: data.start.toDate(),

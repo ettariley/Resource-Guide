@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -7,7 +7,6 @@ import OverlayTrigger from 'react-bootstrap/OverlayTrigger';
 import Tooltip from 'react-bootstrap/Tooltip';
 import Form from 'react-bootstrap/Form';
 import SuccessModal from '../success-modal/success-modal';
-import uuid from 'react-uuid';
 import './resource-card.css';
 import { addDoc, collection } from 'firebase/firestore';
 import { db } from '../../firebase';
@@ -84,7 +83,6 @@ function ResourceCard(props) {
       const editRequestRef = addDoc(collection(db, 'Edit-Requests'), {
         dateSubmitted: new Date(),
         editRequest: formEditRequest,
-        id: uuid(),
         identifier: formIdentifier,
         phone: formPhone,
         provider: resource.provider,

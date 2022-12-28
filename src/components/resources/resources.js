@@ -11,7 +11,6 @@ import Modal from 'react-bootstrap/Modal';
 import Alert from 'react-bootstrap/Alert';
 import ResourceCard from '../resource-card/resource-card';
 import SuccessModal from '../success-modal/success-modal';
-import uuid from 'react-uuid';
 import {
   query,
   orderBy,
@@ -162,7 +161,6 @@ function Resources() {
       const newResourceRef = addDoc(collection(db, 'Resource-Requests'), {
         dateSubmitted: new Date(),
         description: formResourceDescription,
-        id: uuid(),
         identifier: formResourceIdentifier,
         phone: formResourcePhone,
         provider: formResourceProvider,
@@ -270,7 +268,7 @@ function Resources() {
           resourcesArray.push({
             address: data.address,
             description: data.description,
-            id: data.id,
+            id: doc.id,
             phone: data.phone,
             populationFilters: data.populationFilters,
             provider: data.provider,

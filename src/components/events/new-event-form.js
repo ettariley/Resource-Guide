@@ -1,6 +1,4 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { Formik, Field } from 'formik';
-import uuid from 'react-uuid';
+import React, { useState } from 'react';
 import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle';
 import { collection, addDoc } from 'firebase/firestore';
 import Row from 'react-bootstrap/Row';
@@ -116,7 +114,6 @@ function NewEventForm(props) {
     } else {
       const eventRequestRef = addDoc(collection(db, 'Event-Requests'), {
         dateSubmitted: new Date(),
-        id: uuid(),
         identifier: newEventIdentifier,
         hostPhone: newEventPhone || null,
         description: newEventDescription,
