@@ -3,13 +3,23 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import Alert from 'react-bootstrap/Alert';
 import { Link } from 'react-router-dom';
 
 function AddResource() {
+  const [showAlert, setShowAlert] = useState(true);
 
   return (
-    <Container className='mt-5'>
+    <Container className='mt-5 pt-5'>
       <h2>Add Resource</h2>
+      {showAlert ? (
+        <Alert variant="primary" onClose={() => setShowAlert(false)} dismissible>
+          <Alert.Heading>Resource Request Information</Alert.Heading>
+          <p>
+            Here's the information that was provided in the information. We need to build this part out to actually include this information.
+          </p>
+      </Alert>
+      ) : null}
       {/* Return to admin dashboard button */}
       <Row className='mt-5'>
         <Col className='ps-0'>
