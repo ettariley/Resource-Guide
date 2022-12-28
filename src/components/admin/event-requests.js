@@ -213,7 +213,15 @@ function EventRequests() {
           )}
         </Col>
       </Row>
-
+      {/* Return to admin dashboard button */}
+      <Row className='mt-5'>
+        <Col className='ps-0'>
+          <Button variant="outline-light" size='sm' as={Link} to="/admin">
+            <i class="bi bi-arrow-left"></i> Back to Admin Dashboard
+          </Button>
+        </Col>
+      </Row>
+      
       <Modal show={showDeleteWarn} onHide={handleCloseDeleteWarn}>
         <Modal.Header className="text-bg-light" closeButton>
           <Modal.Title>Delete Edit Request</Modal.Title>

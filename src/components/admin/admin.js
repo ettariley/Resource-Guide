@@ -6,7 +6,6 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
-// import Modal from 'react-bootstrap/Modal';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAtom } from 'jotai';
 import {
