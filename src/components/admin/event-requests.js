@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Badge from 'react-bootstrap/Badge';
 import {
   query,
   doc,
@@ -15,6 +16,7 @@ import {
   onSnapshot,
   updateDoc,
   deleteDoc,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
@@ -32,6 +34,7 @@ function EventRequests() {
   const [disabled, setDisabled] = useState(true);
   const [active, setActive] = useState(false);
   const [showDeleteWarn, setShowDeleteWarn] = useState(false);
+  const sortParam = useRef('');
   const events = collection(db, 'Event-Requests');
   const navigate = useNavigate();
 
@@ -39,7 +42,7 @@ function EventRequests() {
   const handleShowDeleteWarn = () => setShowDeleteWarn(true);
 
   useEffect(() => {
-    const eventsQuery = query(events, orderBy('dateSubmitted'));
+    const eventsQuery = query(events, orderBy('dateSubmitted', 'desc'));
 
     const unsubscribe = onSnapshot(eventsQuery, onEventsUpdate);
 
@@ -68,6 +71,110 @@ function EventRequests() {
       });
     });
     setEventRequests(eventsArray);
+  };
+
+  const sortUnread = () => {
+    const unreadEventsArray = [];
+    const unreadQuery = query(events, orderBy('read'));
+    const unreadQSnapshot = getDocs(unreadQuery).then((unreadQSnapshot) => {
+      unreadQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        unreadEventsArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          end: data.end.toDate(),
+          eventHost: data.eventHost,
+          eventLink: data.eventLink || "Not Provided",
+          hostPhone: data.hostPhone || "Not Provided",
+          location: data.location,
+          read: data.read,
+          start: data.start.toDate(),
+          title: data.title,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setEventRequests(unreadEventsArray);
+      sortParam.current = 'Unread';
+    });
+  };
+
+  const sortNewest = () => {
+    const newestEventsArray = [];
+    const newestQuery = query(events, orderBy('dateSubmitted', 'desc'));
+    const newestQSnapshot = getDocs(newestQuery).then((newestQSnapshot) => {
+      newestQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        newestEventsArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          end: data.end.toDate(),
+          eventHost: data.eventHost,
+          eventLink: data.eventLink || "Not Provided",
+          hostPhone: data.hostPhone || "Not Provided",
+          location: data.location,
+          read: data.read,
+          start: data.start.toDate(),
+          title: data.title,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setEventRequests(newestEventsArray);
+      sortParam.current = 'Newest';
+    });
+  };
+
+  const sortOldest = () => {
+    const oldestEventsArray = [];
+    const oldestQuery = query(events, orderBy('dateSubmitted'));
+    const oldestQSnapshot = getDocs(oldestQuery).then((oldestQSnapshot) => {
+      oldestQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        oldestEventsArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          end: data.end.toDate(),
+          eventHost: data.eventHost,
+          eventLink: data.eventLink || "Not Provided",
+          hostPhone: data.hostPhone || "Not Provided",
+          location: data.location,
+          read: data.read,
+          start: data.start.toDate(),
+          title: data.title,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setEventRequests(oldestEventsArray);
+      sortParam.current = 'Oldest';
+    });
+  };
+
+  const sortTitle = () => {
+    const titleEventsArray = [];
+    const titleQuery = query(events, orderBy('title'));
+    const titleQSnapshot = getDocs(titleQuery).then((titleQSnapshot) => {
+      titleQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        titleEventsArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          end: data.end.toDate(),
+          eventHost: data.eventHost,
+          eventLink: data.eventLink || "Not Provided",
+          hostPhone: data.hostPhone || "Not Provided",
+          location: data.location,
+          read: data.read,
+          start: data.start.toDate(),
+          title: data.title,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setEventRequests(titleEventsArray);
+      sortParam.current = 'Title';
+    });
   };
 
   const handleSelectDisabled = (v) => {
@@ -103,22 +210,29 @@ function EventRequests() {
           sm="4"
           className="sort-filter border border-secondary border-1 d-flex p-0"
         >
-          <Col xs="6" className="border-end text-center">
+          <Col xs="6" className="border-end text-center d-flex justify-content-center">
             <DropdownButton
               variant="link"
               className=""
               id="dropdown-sort"
               title="Sort"
             >
-              <Dropdown.Item href="#/action-1">Unread</Dropdown.Item>
-              <Dropdown.Item href="#/action-2">
+              <Dropdown.Item onClick={() => sortUnread()}>Unread</Dropdown.Item>
+              <Dropdown.Item onClick={() => sortNewest()}>
                 Date Submitted (Newest)
               </Dropdown.Item>
-              <Dropdown.Item href="#/action-3">
+              <Dropdown.Item onClick={() => sortOldest()}>
                 Date Submitted (Oldest)
               </Dropdown.Item>
-              <Dropdown.Item href="#/action-4">Subject</Dropdown.Item>
+              <Dropdown.Item onClick={() => sortTitle()}>
+                Title
+              </Dropdown.Item>
             </DropdownButton>
+            {sortParam.current !== '' ? (
+              <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
+                {sortParam.current}
+              </Badge>
+            ) : null}
           </Col>
           <Col xs="6" className="text-center">
             <DropdownButton

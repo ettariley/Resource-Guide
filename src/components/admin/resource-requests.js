@@ -7,6 +7,7 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
+import Badge from 'react-bootstrap/Badge';
 import {
   query,
   doc,
@@ -15,6 +16,7 @@ import {
   onSnapshot,
   updateDoc,
   deleteDoc,
+  getDocs,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
@@ -26,12 +28,12 @@ import AddEvent from './add-event';
 import AddResource from './add-resource';
 
 function ResourceRequests() {
-
   const [resourceRequests, setResourceRequests] = useState([]);
   const [selected, setSelected] = useState({});
   const [disabled, setDisabled] = useState(true);
   const [active, setActive] = useState(false);
   const [showDeleteWarn, setShowDeleteWarn] = useState(false);
+  const sortParam = useRef('');
   const resources = collection(db, 'Resource-Requests');
   const navigate = useNavigate();
 
@@ -39,7 +41,7 @@ function ResourceRequests() {
   const handleShowDeleteWarn = () => setShowDeleteWarn(true);
 
   useEffect(() => {
-    const resourcesQuery = query(resources, orderBy('dateSubmitted'));
+    const resourcesQuery = query(resources, orderBy('dateSubmitted', 'desc'));
 
     const unsubscribe = onSnapshot(resourcesQuery, onResourcesUpdate);
 
@@ -55,8 +57,8 @@ function ResourceRequests() {
       resourcesArray.push({
         dateSubmitted: data.dateSubmitted.toDate(),
         description: data.description,
-        website: data.website || "Not Provided",
-        phone: data.phone || "Not Provided",
+        website: data.website || 'Not Provided',
+        phone: data.phone || 'Not Provided',
         address: data.address,
         read: data.read,
         provider: data.provider,
@@ -65,6 +67,100 @@ function ResourceRequests() {
       });
     });
     setResourceRequests(resourcesArray);
+  };
+
+  const sortUnread = () => {
+    const unreadResourcesArray = [];
+    const unreadQuery = query(resources, orderBy('read'));
+    const unreadQSnapshot = getDocs(unreadQuery).then((unreadQSnapshot) => {
+      unreadQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        unreadResourcesArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          website: data.website || 'Not Provided',
+          phone: data.phone || 'Not Provided',
+          address: data.address,
+          read: data.read,
+          provider: data.provider,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setResourceRequests(unreadResourcesArray);
+      sortParam.current = 'Unread';
+    });
+  };
+
+  const sortNewest = () => {
+    const newestResourcesArray = [];
+    const newestQuery = query(resources, orderBy('dateSubmitted', 'desc'));
+    const newestQSnapshot = getDocs(newestQuery).then((newestQSnapshot) => {
+      newestQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        newestResourcesArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          website: data.website || 'Not Provided',
+          phone: data.phone || 'Not Provided',
+          address: data.address,
+          read: data.read,
+          provider: data.provider,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setResourceRequests(newestResourcesArray);
+      sortParam.current = 'Newest';
+    });
+  };
+
+  const sortOldest = () => {
+    const oldestResourcesArray = [];
+    const oldestQuery = query(resources, orderBy('dateSubmitted'));
+    const oldestQSnapshot = getDocs(oldestQuery).then((oldestQSnapshot) => {
+      oldestQSnapshot.forEach((doc) => {
+        let data = doc.data();
+        oldestResourcesArray.push({
+          dateSubmitted: data.dateSubmitted.toDate(),
+          description: data.description,
+          website: data.website || 'Not Provided',
+          phone: data.phone || 'Not Provided',
+          address: data.address,
+          read: data.read,
+          provider: data.provider,
+          id: doc.id,
+          identifier: data.identifier,
+        });
+      });
+      setResourceRequests(oldestResourcesArray);
+      sortParam.current = 'Oldest';
+    });
+  };
+
+  const sortProvider = () => {
+    const providerResourcesArray = [];
+    const providerQuery = query(resources, orderBy('provider'));
+    const providerQSnapshot = getDocs(providerQuery).then(
+      (providerQSnapshot) => {
+        providerQSnapshot.forEach((doc) => {
+          let data = doc.data();
+          providerResourcesArray.push({
+            dateSubmitted: data.dateSubmitted.toDate(),
+            description: data.description,
+            website: data.website || 'Not Provided',
+            phone: data.phone || 'Not Provided',
+            address: data.address,
+            read: data.read,
+            provider: data.provider,
+            id: doc.id,
+            identifier: data.identifier,
+          });
+        });
+        setResourceRequests(providerResourcesArray);
+        sortParam.current = 'Provider';
+      }
+    );
   };
 
   const handleSelectDisabled = (r) => {
@@ -96,26 +192,33 @@ function ResourceRequests() {
     <Container className="mt-5 pt-5 pb-4">
       <h2>New Resource Requests</h2>
       <Row>
-        <Col
-          sm="4"
-          className="sort-filter border border-1 d-flex p-0"
-        >
-          <Col xs="6" className="border-end text-center">
+        <Col sm="4" className="sort-filter border border-1 d-flex p-0">
+          <Col
+            xs="6"
+            className="border-end text-center d-flex justify-content-center"
+          >
             <DropdownButton
               variant="link"
               className=""
               id="dropdown-sort"
               title="Sort"
             >
-              <Dropdown.Item href="#/action-1">Unread</Dropdown.Item>
-              <Dropdown.Item href="#/action-2">
+              <Dropdown.Item onClick={() => sortUnread()}>Unread</Dropdown.Item>
+              <Dropdown.Item onClick={() => sortNewest()}>
                 Date Submitted (Newest)
               </Dropdown.Item>
-              <Dropdown.Item href="#/action-3">
+              <Dropdown.Item onClick={() => sortOldest()}>
                 Date Submitted (Oldest)
               </Dropdown.Item>
-              <Dropdown.Item href="#/action-4">Subject</Dropdown.Item>
+              <Dropdown.Item onClick={() => sortProvider()}>
+                Provider
+              </Dropdown.Item>
             </DropdownButton>
+            {sortParam.current !== '' ? (
+              <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
+                {sortParam.current}
+              </Badge>
+            ) : null}
           </Col>
           <Col xs="6" className="text-center">
             <DropdownButton
@@ -124,15 +227,13 @@ function ResourceRequests() {
               id="dropdown-filter"
               title="Filter"
             >
-              <Dropdown.Item href="#/action-1">Unread</Dropdown.Item>
-              <Dropdown.Item href="#/action-2">Read</Dropdown.Item>
+              <Dropdown.Item>Unread</Dropdown.Item>
+              <Dropdown.Item>Read</Dropdown.Item>
+              <Dropdown.Item>Provider</Dropdown.Item>
             </DropdownButton>
           </Col>
         </Col>
-        <Col
-          sm="8"
-          className="edit-selected border border-1 text-center"
-        >
+        <Col sm="8" className="edit-selected border border-1 text-center">
           <Row xs={3}>
             <Col>
               <button
@@ -205,17 +306,19 @@ function ResourceRequests() {
               <p>Provider Site: {selected.website}</p>
             </>
           ) : (
-            <div className='text-center text-muted pt-5'>
-              <h3><i class="bi bi-envelope-open"></i></h3>
+            <div className="text-center text-muted pt-5">
+              <h3>
+                <i class="bi bi-envelope-open"></i>
+              </h3>
               <h3>No message selected</h3>
             </div>
           )}
         </Col>
       </Row>
       {/* Return to admin dashboard button */}
-      <Row className='mt-5'>
-        <Col className='ps-0'>
-          <Button variant="outline-light" size='sm' as={Link} to="/admin">
+      <Row className="mt-5">
+        <Col className="ps-0">
+          <Button variant="outline-light" size="sm" as={Link} to="/admin">
             <i class="bi bi-arrow-left"></i> Back to Admin Dashboard
           </Button>
         </Col>
@@ -223,11 +326,11 @@ function ResourceRequests() {
 
       <Modal show={showDeleteWarn} onHide={handleCloseDeleteWarn}>
         <Modal.Header className="text-bg-light" closeButton>
-          <Modal.Title>Delete Edit Request</Modal.Title>
+          <Modal.Title>Delete Resource Request</Modal.Title>
         </Modal.Header>
         <Modal.Body className="text-bg-light">
-          Are you sure you want to delete this resource request? This action cannot
-          be undone.
+          Are you sure you want to delete this resource request? This action
+          cannot be undone.
         </Modal.Body>
         <Modal.Footer className="text-bg-light">
           <Button variant="secondary" onClick={handleCloseDeleteWarn}>
