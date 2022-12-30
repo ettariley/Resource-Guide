@@ -78,8 +78,6 @@ function Resources() {
   const handleCloseSuccessModal = () => setShowSuccessModal(false);
   const handleShowSuccessModal = () => setShowSuccessModal(true);
 
-  
-
   const onResourceFormChange = (type, value) => {
     switch (type) {
       case 'identifier':
@@ -119,7 +117,7 @@ function Resources() {
 
   const findFormErrors = () => {
     const newErrors = {};
-    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    const phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
     if (!formResourceIdentifier || formResourceIdentifier === '') {
       newErrors.formResourceIdentifier = 'Required';
     }
@@ -131,7 +129,7 @@ function Resources() {
     }
     if (!formResourcePhone || formResourcePhone === '') {
       newErrors.formResourcePhone = 'Required';
-    } else if (formResourcePhone !== '' && !formResourcePhone.match(phoneno)) {
+    } else if (!phoneno.test(formResourcePhone)) {
       newErrors.formResourcePhone =
         'Phone number should be in 123-456-7890 or 123.456.7890 format.';
     }
@@ -177,9 +175,6 @@ function Resources() {
 
   // filter statements
   const filterResources = () => {
-    console.log('text: ' + searchText.current);
-    console.log('prog: ' + progFilter.current);
-    console.log('pop: ' + popFilter.current);
     switch (true) {
       case searchText.current !== '' &&
         progFilter.current !== '' &&
@@ -428,7 +423,6 @@ function Resources() {
                   }
                 />
                 <Form.Check
-                  required
                   type="radio"
                   label="Employee of this Provider"
                   value="Employee of this Provider"
@@ -440,7 +434,6 @@ function Resources() {
                   }
                 />
                 <Form.Check
-                  required
                   type="radio"
                   label="Employee of another Provider"
                   value="Employee of another Provider"
