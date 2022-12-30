@@ -20,12 +20,12 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import EditResource from './edit-resource';
 import EditEvent from './edit-event';
 import AddEvent from './add-event';
 import AddResource from './add-resource';
-import { Form } from 'react-bootstrap';
+import Form from 'react-bootstrap/Form';
 
 function EditResourceRequests() {
   const [editRequests, setEditRequests] = useState([]);
@@ -37,7 +37,6 @@ function EditResourceRequests() {
   const filterParam = useRef('');
   const filterText = useRef('');
   const edits = collection(db, 'Edit-Requests');
-  const navigate = useNavigate();
 
   const handleCloseDeleteWarn = () => setShowDeleteWarn(false);
   const handleShowDeleteWarn = () => setShowDeleteWarn(true);
@@ -88,6 +87,7 @@ function EditResourceRequests() {
         });
       });
       setEditRequests(unreadEditsArray);
+      setFilteredRequests(unreadEditsArray);
       sortParam.current = 'Unread';
     });
   };
@@ -109,6 +109,7 @@ function EditResourceRequests() {
         });
       });
       setEditRequests(newestEditsArray);
+      setFilteredRequests(newestEditsArray);
       sortParam.current = 'Newest';
     });
   };
@@ -130,6 +131,7 @@ function EditResourceRequests() {
         });
       });
       setEditRequests(oldestEditsArray);
+      setFilteredRequests(oldestEditsArray);
       sortParam.current = 'Oldest';
     });
   };
@@ -151,13 +153,14 @@ function EditResourceRequests() {
         });
       });
       setEditRequests(subjectEditsArray);
+      setFilteredRequests(subjectEditsArray);
       sortParam.current = 'Subject';
     });
   };
 
   const updateFilterText = (value) => {
     filterText.current = value;
-    filterRequests("provider");
+    filterRequests('provider');
   };
 
   const filterRequests = (param) => {
@@ -165,12 +168,12 @@ function EditResourceRequests() {
     switch (param) {
       case 'unread':
         filteredArray = editRequests.filter((r) => !r.read);
-        setEditRequests(filteredArray);
+        setFilteredRequests(filteredArray);
         filterParam.current = 'Unread';
         break;
       case 'read':
         filteredArray = editRequests.filter((r) => r.read);
-        setEditRequests(filteredArray);
+        setFilteredRequests(filteredArray);
         filterParam.current = 'Read';
         break;
       case 'provider':
@@ -178,7 +181,11 @@ function EditResourceRequests() {
         filteredArray = editRequests.filter((r) =>
           r.provider.toLowerCase().includes(filterText.current.toLowerCase())
         );
-        setEditRequests(filteredArray);
+        setFilteredRequests(filteredArray);
+        break;
+      case 'clear':
+        filterParam.current = '';
+        setFilteredRequests(editRequests);
         break;
       default:
         break;
@@ -203,8 +210,9 @@ function EditResourceRequests() {
   };
 
   // const navEditResource = () => {
-  //   // navigate('admin/edit-resource');
-  //   <EditResource selected={selected} />
+  //   navigate('/admin/edit-resource', { state: {selected: {selected}} });
+  //   // <EditResource selected={selected} />
+  //   // <Navigate to='/admin/edit-resource'/>
   // };
 
   const handleDeleteRequest = () => {
@@ -219,57 +227,78 @@ function EditResourceRequests() {
     <Container className="mt-5 pt-5 pb-4">
       <h2>Edit Resource Requests</h2>
       <Row>
-        <Col
-          sm="4"
-          className="sort-filter border border-secondary border-1 d-flex p-0"
-        >
-          <Col
-            xs="6"
-            className="border-end text-center d-flex justify-content-center"
-          >
-            <DropdownButton
-              variant="link"
-              className=""
-              id="dropdown-sort"
-              title="Sort"
+        <Col sm="4" className="sort-filter border border-secondary border-1">
+          <Row>
+            <Col
+              xs="6"
+              className="border-end text-center d-flex justify-content-center"
             >
-              <Dropdown.Item onClick={() => sortUnread()}>Unread</Dropdown.Item>
-              <Dropdown.Item onClick={() => sortNewest()}>
-                Date Submitted (Newest)
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => sortOldest()}>
-                Date Submitted (Oldest)
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => sortSubject()}>
-                Subject
-              </Dropdown.Item>
-            </DropdownButton>
-            {sortParam.current !== '' ? (
-              <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
-                {sortParam.current}
-              </Badge>
+              <DropdownButton
+                variant="link"
+                className=""
+                id="dropdown-sort"
+                title="Sort"
+              >
+                <Dropdown.Item onClick={() => sortUnread()}>
+                  Unread
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortNewest()}>
+                  Date Submitted (Newest)
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortOldest()}>
+                  Date Submitted (Oldest)
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortSubject()}>
+                  Subject
+                </Dropdown.Item>
+              </DropdownButton>
+              {sortParam.current !== '' ? (
+                <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
+                  {sortParam.current}
+                </Badge>
+              ) : null}
+            </Col>
+            <Col xs="6" className="text-center d-flex justify-content-center">
+              <DropdownButton
+                variant="link"
+                className=""
+                id="dropdown-filter"
+                title="Filter"
+              >
+                <Dropdown.Item onClick={() => filterRequests('unread')}>
+                  Unread
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => filterRequests('read')}>
+                  Read
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => filterRequests('provider')}>
+                  Provider
+                </Dropdown.Item>
+              </DropdownButton>
+              {filterParam.current !== '' ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="m-1"
+                  onClick={() => filterRequests('clear')}
+                >
+                  {filterParam.current} | X
+                </Button>
+              ) : null}
+            </Col>
+          </Row>
+          <Row>
+            {filterParam.current === 'Provider' ? (
+              <Col className="p-1">
+                <Form.Control
+                  type="text"
+                  value={filterText.current}
+                  onChange={(e) => updateFilterText(e.target.value)}
+                  placeholder="Enter Provider Name"
+                />
+              </Col>
             ) : null}
-          </Col>
-          <Col xs="6" className="text-center">
-            <DropdownButton
-              variant="link"
-              className=""
-              id="dropdown-filter"
-              title="Filter"
-            >
-              <Dropdown.Item onClick={() => filterRequests("unread")}>Unread</Dropdown.Item>
-              <Dropdown.Item onClick={() => filterRequests("read")}>Read</Dropdown.Item>
-              <Dropdown.Item onClick={() => filterRequests("provider")}>Provider</Dropdown.Item>
-            </DropdownButton>
-            {filterParam === 'Provider' ? (
-              <Form.Control
-                type="text"
-                value={filterText.current}
-                onChange={(e) => updateFilterText(e.target.value)}
-                placeholder="Enter Provider Name"
-              />
-            ) : null}
-          </Col>
+          </Row>
         </Col>
         <Col
           sm="8"
@@ -287,9 +316,10 @@ function EditResourceRequests() {
             </Col>
             <Col className="border-start border-end">
               <button className="btn btn-link" disabled={disabled}>
-                <Link to="/admin/edit-resource">Edit Resource</Link>
+                <Link to="/admin/edit-resource" state={{ selected: selected }}>
+                  Edit Resource
+                </Link>
               </button>
-              {/* <button className='btn btn-link' disabled={disabled} onClick={() => navEditResource()}>Edit Resource</button> */}
             </Col>
             <Col>
               <button
@@ -304,9 +334,12 @@ function EditResourceRequests() {
         </Col>
       </Row>
       <Row>
-        <Col sm="4" className="border border-secondary border-1 p-0">
+        <Col
+          sm="4"
+          className="requests-list-col border border-secondary border-1 p-0"
+        >
           <ListGroup variant="flush" activeKey={selected.id}>
-            {editRequests.map((r) => (
+            {filteredRequests.map((r) => (
               <ListGroup.Item
                 action
                 eventKey={r.id}

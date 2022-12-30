@@ -20,8 +20,8 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
-import { Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Button, Form } from 'react-bootstrap';
+import { Link } from 'react-router-dom';
 import EditResource from './edit-resource';
 import EditEvent from './edit-event';
 import AddEvent from './add-event';
@@ -30,13 +30,16 @@ import AddResource from './add-resource';
 function EventRequests() {
 
   const [eventRequests, setEventRequests] = useState([]);
+  const [filteredERequests, setFilteredERequests] = useState([]);
   const [selected, setSelected] = useState({});
   const [disabled, setDisabled] = useState(true);
-  const [active, setActive] = useState(false);
   const [showDeleteWarn, setShowDeleteWarn] = useState(false);
+
   const sortParam = useRef('');
+  const filterParam = useRef('');
+  const filterText = useRef('');
+  
   const events = collection(db, 'Event-Requests');
-  const navigate = useNavigate();
 
   const handleCloseDeleteWarn = () => setShowDeleteWarn(false);
   const handleShowDeleteWarn = () => setShowDeleteWarn(true);
@@ -71,6 +74,8 @@ function EventRequests() {
       });
     });
     setEventRequests(eventsArray);
+    setFilteredERequests(eventsArray);
+    sortParam.current = '';
   };
 
   const sortUnread = () => {
@@ -95,6 +100,7 @@ function EventRequests() {
         });
       });
       setEventRequests(unreadEventsArray);
+      setFilteredERequests(unreadEventsArray);
       sortParam.current = 'Unread';
     });
   };
@@ -121,6 +127,7 @@ function EventRequests() {
         });
       });
       setEventRequests(newestEventsArray);
+      setFilteredERequests(newestEventsArray);
       sortParam.current = 'Newest';
     });
   };
@@ -147,6 +154,7 @@ function EventRequests() {
         });
       });
       setEventRequests(oldestEventsArray);
+      setFilteredERequests(oldestEventsArray);
       sortParam.current = 'Oldest';
     });
   };
@@ -173,8 +181,43 @@ function EventRequests() {
         });
       });
       setEventRequests(titleEventsArray);
+      setFilteredERequests(titleEventsArray);
       sortParam.current = 'Title';
     });
+  };
+
+  const updateFilterText = (value) => {
+    filterText.current = value;
+    filterRequests('title');
+  };
+
+  const filterRequests = (param) => {
+    let filteredArray = [];
+    switch (param) {
+      case 'unread':
+        filteredArray = eventRequests.filter((r) => !r.read);
+        setFilteredERequests(filteredArray);
+        filterParam.current = 'Unread';
+        break;
+      case 'read':
+        filteredArray = eventRequests.filter((r) => r.read);
+        setFilteredERequests(filteredArray);
+        filterParam.current = 'Read';
+        break;
+      case 'title':
+        filterParam.current = 'Title';
+        filteredArray = eventRequests.filter((r) =>
+          r.title.toLowerCase().includes(filterText.current.toLowerCase())
+        );
+        setFilteredERequests(filteredArray);
+        break;
+      case 'clear':
+        filterParam.current = '';
+        setFilteredERequests(eventRequests);
+        break;
+      default:
+        break;
+    }
   };
 
   const handleSelectDisabled = (v) => {
@@ -208,43 +251,74 @@ function EventRequests() {
       <Row>
         <Col
           sm="4"
-          className="sort-filter border border-secondary border-1 d-flex p-0"
+          className="sort-filter border border-secondary border-1"
         >
-          <Col xs="6" className="border-end text-center d-flex justify-content-center">
-            <DropdownButton
-              variant="link"
-              className=""
-              id="dropdown-sort"
-              title="Sort"
-            >
-              <Dropdown.Item onClick={() => sortUnread()}>Unread</Dropdown.Item>
-              <Dropdown.Item onClick={() => sortNewest()}>
-                Date Submitted (Newest)
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => sortOldest()}>
-                Date Submitted (Oldest)
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => sortTitle()}>
-                Title
-              </Dropdown.Item>
-            </DropdownButton>
-            {sortParam.current !== '' ? (
-              <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
-                {sortParam.current}
-              </Badge>
-            ) : null}
-          </Col>
-          <Col xs="6" className="text-center">
-            <DropdownButton
-              variant="link"
-              className=""
-              id="dropdown-filter"
-              title="Filter"
-            >
-              <Dropdown.Item href="#/action-1">Unread</Dropdown.Item>
-              <Dropdown.Item href="#/action-2">Read</Dropdown.Item>
-            </DropdownButton>
-          </Col>
+          <Row>
+            <Col xs="6" className="border-end text-center d-flex justify-content-center">
+              <DropdownButton
+                variant="link"
+                className=""
+                id="dropdown-sort"
+                title="Sort"
+              >
+                <Dropdown.Item onClick={() => sortUnread()}>Unread</Dropdown.Item>
+                <Dropdown.Item onClick={() => sortNewest()}>
+                  Date Submitted (Newest)
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortOldest()}>
+                  Date Submitted (Oldest)
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortTitle()}>
+                  Title
+                </Dropdown.Item>
+              </DropdownButton>
+              {sortParam.current !== '' ? (
+                <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
+                  {sortParam.current}
+                </Badge>
+              ) : null}
+            </Col>
+            <Col xs="6" className="text-center d-flex justify-content-center">
+              <DropdownButton
+                variant="link"
+                className=""
+                id="dropdown-filter"
+                title="Filter"
+              >
+                <Dropdown.Item onClick={() => filterRequests('unread')}>
+                  Unread
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => filterRequests('read')}>
+                  Read
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => filterRequests('title')}>
+                  Title
+                </Dropdown.Item>
+              </DropdownButton>
+              {filterParam.current !== '' ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="m-1"
+                  onClick={() => filterRequests('clear')}
+                >
+                  {filterParam.current} | X
+                </Button>
+              ) : null}
+            </Col>
+          </Row>
+          <Row>
+            {filterParam.current === 'Title' ? (
+                <Col className="p-1">
+                  <Form.Control
+                    type="text"
+                    value={filterText.current}
+                    onChange={(e) => updateFilterText(e.target.value)}
+                    placeholder="Enter Event Title"
+                  />
+                </Col>
+              ) : null} 
+          </Row>
         </Col>
         <Col
           sm="8"
@@ -262,7 +336,7 @@ function EventRequests() {
             </Col>
             <Col className="border-start border-end">
               <button className="btn btn-link" disabled={disabled}>
-                <Link to="/admin/add-event">Add New Event</Link>
+                <Link to="/admin/add-event" state={{ selected: selected }}>Add New Event</Link>
               </button>
             </Col>
             <Col>
@@ -283,7 +357,7 @@ function EventRequests() {
             variant="flush"
             activeKey={selected.id}
           >
-            {eventRequests.map((v) => (
+            {filteredERequests.map((v) => (
               <ListGroup.Item
                 action
                 eventKey={v.id}

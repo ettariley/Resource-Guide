@@ -1,6 +1,5 @@
 import React, { useEffect, useRef, useState } from 'react';
 import Container from 'react-bootstrap/Container';
-import Card from 'react-bootstrap/Card';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
 import Row from 'react-bootstrap/Row';
@@ -8,6 +7,7 @@ import Col from 'react-bootstrap/Col';
 import Modal from 'react-bootstrap/Modal';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Badge from 'react-bootstrap/Badge';
+import Form from 'react-bootstrap/Form';
 import {
   query,
   doc,
@@ -21,7 +21,7 @@ import {
 import { db } from '../../firebase';
 import './admin.css';
 import { Button } from 'react-bootstrap';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import EditResource from './edit-resource';
 import EditEvent from './edit-event';
 import AddEvent from './add-event';
@@ -29,13 +29,17 @@ import AddResource from './add-resource';
 
 function ResourceRequests() {
   const [resourceRequests, setResourceRequests] = useState([]);
+  const [filteredRRequests, setFilteredRRequests] = useState([]);
   const [selected, setSelected] = useState({});
   const [disabled, setDisabled] = useState(true);
   const [active, setActive] = useState(false);
   const [showDeleteWarn, setShowDeleteWarn] = useState(false);
+
   const sortParam = useRef('');
+  const filterParam = useRef('');
+  const filterText = useRef('');
+
   const resources = collection(db, 'Resource-Requests');
-  const navigate = useNavigate();
 
   const handleCloseDeleteWarn = () => setShowDeleteWarn(false);
   const handleShowDeleteWarn = () => setShowDeleteWarn(true);
@@ -67,6 +71,8 @@ function ResourceRequests() {
       });
     });
     setResourceRequests(resourcesArray);
+    setFilteredRRequests(resourcesArray);
+    sortParam.current = '';
   };
 
   const sortUnread = () => {
@@ -88,6 +94,7 @@ function ResourceRequests() {
         });
       });
       setResourceRequests(unreadResourcesArray);
+      setFilteredRRequests(unreadResourcesArray);
       sortParam.current = 'Unread';
     });
   };
@@ -111,6 +118,7 @@ function ResourceRequests() {
         });
       });
       setResourceRequests(newestResourcesArray);
+      setFilteredRRequests(newestResourcesArray);
       sortParam.current = 'Newest';
     });
   };
@@ -134,6 +142,7 @@ function ResourceRequests() {
         });
       });
       setResourceRequests(oldestResourcesArray);
+      setFilteredRRequests(oldestResourcesArray);
       sortParam.current = 'Oldest';
     });
   };
@@ -158,9 +167,44 @@ function ResourceRequests() {
           });
         });
         setResourceRequests(providerResourcesArray);
+        setFilteredRRequests(providerResourcesArray);
         sortParam.current = 'Provider';
       }
     );
+  };
+
+  const updateFilterText = (value) => {
+    filterText.current = value;
+    filterRequests('provider');
+  };
+
+  const filterRequests = (param) => {
+    let filteredArray = [];
+    switch (param) {
+      case 'unread':
+        filteredArray = resourceRequests.filter((r) => !r.read);
+        setFilteredRRequests(filteredArray);
+        filterParam.current = 'Unread';
+        break;
+      case 'read':
+        filteredArray = resourceRequests.filter((r) => r.read);
+        setFilteredRRequests(filteredArray);
+        filterParam.current = 'Read';
+        break;
+      case 'provider':
+        filterParam.current = 'Provider';
+        filteredArray = resourceRequests.filter((r) =>
+          r.provider.toLowerCase().includes(filterText.current.toLowerCase())
+        );
+        setFilteredRRequests(filteredArray);
+        break;
+      case 'clear':
+        filterParam.current = '';
+        setFilteredRRequests(resourceRequests);
+        break;
+      default:
+        break;
+    }
   };
 
   const handleSelectDisabled = (r) => {
@@ -192,46 +236,78 @@ function ResourceRequests() {
     <Container className="mt-5 pt-5 pb-4">
       <h2>New Resource Requests</h2>
       <Row>
-        <Col sm="4" className="sort-filter border border-1 d-flex p-0">
-          <Col
-            xs="6"
-            className="border-end text-center d-flex justify-content-center"
-          >
-            <DropdownButton
-              variant="link"
-              className=""
-              id="dropdown-sort"
-              title="Sort"
+        <Col sm="4" className="sort-filter border border-1">
+          <Row>
+            <Col
+              xs="6"
+              className="border-end text-center d-flex justify-content-center"
             >
-              <Dropdown.Item onClick={() => sortUnread()}>Unread</Dropdown.Item>
-              <Dropdown.Item onClick={() => sortNewest()}>
-                Date Submitted (Newest)
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => sortOldest()}>
-                Date Submitted (Oldest)
-              </Dropdown.Item>
-              <Dropdown.Item onClick={() => sortProvider()}>
-                Provider
-              </Dropdown.Item>
-            </DropdownButton>
-            {sortParam.current !== '' ? (
-              <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
-                {sortParam.current}
-              </Badge>
+              <DropdownButton
+                variant="link"
+                className=""
+                id="dropdown-sort"
+                title="Sort"
+              >
+                <Dropdown.Item onClick={() => sortUnread()}>
+                  Unread
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortNewest()}>
+                  Date Submitted (Newest)
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortOldest()}>
+                  Date Submitted (Oldest)
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => sortProvider()}>
+                  Provider
+                </Dropdown.Item>
+              </DropdownButton>
+              {sortParam.current !== '' ? (
+                <Badge bg="secondary" className="mt-2 mb-2 ms-1 me-1">
+                  {sortParam.current}
+                </Badge>
+              ) : null}
+            </Col>
+            <Col xs="6" className="text-center d-flex justify-content-center">
+              <DropdownButton
+                variant="link"
+                className=""
+                id="dropdown-filter"
+                title="Filter"
+              >
+                <Dropdown.Item onClick={() => filterRequests('unread')}>
+                  Unread
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => filterRequests('read')}>
+                  Read
+                </Dropdown.Item>
+                <Dropdown.Item onClick={() => filterRequests('provider')}>
+                  Provider
+                </Dropdown.Item>
+              </DropdownButton>
+              {filterParam.current !== '' ? (
+                <Button
+                  size="sm"
+                  variant="secondary"
+                  className="m-1"
+                  onClick={() => filterRequests('clear')}
+                >
+                  {filterParam.current} | X
+                </Button>
+              ) : null}
+            </Col>
+          </Row>
+          <Row>
+            {filterParam.current === 'Provider' ? (
+              <Col className="p-1">
+                <Form.Control
+                  type="text"
+                  value={filterText.current}
+                  onChange={(e) => updateFilterText(e.target.value)}
+                  placeholder="Enter Provider Name"
+                />
+              </Col>
             ) : null}
-          </Col>
-          <Col xs="6" className="text-center">
-            <DropdownButton
-              variant="link"
-              className=""
-              id="dropdown-filter"
-              title="Filter"
-            >
-              <Dropdown.Item>Unread</Dropdown.Item>
-              <Dropdown.Item>Read</Dropdown.Item>
-              <Dropdown.Item>Provider</Dropdown.Item>
-            </DropdownButton>
-          </Col>
+          </Row>
         </Col>
         <Col sm="8" className="edit-selected border border-1 text-center">
           <Row xs={3}>
@@ -246,7 +322,9 @@ function ResourceRequests() {
             </Col>
             <Col className="border-start border-end">
               <button className="btn btn-link" disabled={disabled}>
-                <Link to="/admin/add-resource">Add New Resource</Link>
+                <Link to="/admin/add-resource" state={{ selected: selected }}>
+                  Add New Resource
+                </Link>
               </button>
             </Col>
             <Col>
@@ -269,7 +347,7 @@ function ResourceRequests() {
             // key={resourceRequests.id}
             // className=""
           >
-            {resourceRequests.map((r) => (
+            {filteredRRequests.map((r) => (
               <ListGroup.Item
                 action
                 eventKey={r.id}
