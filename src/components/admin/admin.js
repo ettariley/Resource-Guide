@@ -173,10 +173,10 @@ function Admin() {
               <Card.Body className="text-bg-light">
                 <Card.Title>Resources</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="add-resource">Add New Resource</Button>
+                  <Button variant="secondary" as={Link} to="add-resource" state={{ selected: {} }}>Add New Resource</Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="edit-resource">Edit or Remove Resource</Button>
+                  <Button variant="secondary" as={Link} to="edit-resource" state={{ selected: {} }}>Edit or Remove Resource</Button>
                 </Card.Text>
               </Card.Body>
             </Card>
@@ -186,7 +186,7 @@ function Admin() {
               <Card.Body className="text-bg-light">
                 <Card.Title>Events</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="add-event">Add New Event</Button>
+                  <Button variant="secondary" as={Link} to="add-event" state={{ selected: {} }}>Add New Event</Button>
                 </Card.Text>
                 <Card.Text>
                   <Button variant="secondary" as={Link} to="edit-event">Edit or Remove Event</Button>
