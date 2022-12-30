@@ -21,3 +21,7 @@
   background-color: #b8d1ce;
   color: #0a141a;
 }
+
+.form-check-input, .form-check-input:checked {
+  background-color: #89b2ae;
+}
