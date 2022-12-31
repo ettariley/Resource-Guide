@@ -209,12 +209,6 @@ function EditResourceRequests() {
     });
   };
 
-  // const navEditResource = () => {
-  //   navigate('/admin/edit-resource', { state: {selected: {selected}} });
-  //   // <EditResource selected={selected} />
-  //   // <Navigate to='/admin/edit-resource'/>
-  // };
-
   const handleDeleteRequest = () => {
     const editDocReadRef = doc(edits, selected.id);
     deleteDoc(editDocReadRef).then(() => {

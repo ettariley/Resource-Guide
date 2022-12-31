@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import DateTimePicker from 'react-datetime-picker/dist/entry.nostyle';
+import DateTimePicker from 'react-datetime-picker';
 import { collection, addDoc } from 'firebase/firestore';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';

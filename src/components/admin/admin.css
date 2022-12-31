@@ -25,3 +25,11 @@
 .form-check-input, .form-check-input:checked {
   background-color: #89b2ae;
 }
+
+.react-datetime-picker__wrapper {
+  background-color: #89b2ae;
+}
+
+.react-calendar__month-view__days__day--weekend {
+  color: #89b2ae;
+}

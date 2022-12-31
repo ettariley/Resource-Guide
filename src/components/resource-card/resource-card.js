@@ -1,4 +1,4 @@
-import React, { useRef, useState } from 'react';
+import React, { useRef, useState, useEffect } from 'react';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
@@ -23,6 +23,16 @@ function ResourceCard(props) {
 
   const resourcePop = useRef(resource.populationFilters.sort());
   const resourceServ = useRef(resource.serviceFilters.sort());
+
+  const hasPops = () => {
+    if (resourcePop.current.at(0) === '') {
+      return false;
+    } else if (resourcePop.current.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
 
   const onIdentifierChange = (value) => {
     setFormIdentifier(value);
@@ -117,7 +127,7 @@ function ResourceCard(props) {
               <ListGroup.Item variant="primary">{s}</ListGroup.Item>
             </ListGroup>
           ))}
-          {resourcePop.current.at(0) !== '' ? (
+          {hasPops() ? (
             <>
               <h5>Populations:</h5>
               {resourcePop.current.map((p) => (
