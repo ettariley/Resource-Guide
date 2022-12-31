@@ -3,29 +3,36 @@ import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
+import ListGroup from 'react-bootstrap/ListGroup';
 import Alert from 'react-bootstrap/Alert';
+import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
+import Modal from 'react-bootstrap/Modal';
 import { Link, useLocation } from 'react-router-dom';
 import {
   query,
-  orderBy,
+  where,
   collection,
   doc,
   getDocs,
   getDoc,
   addDoc,
+  getCountFromServer,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
 
 function AddResource() {
   const [showAlert, setShowAlert] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showDuplicateModal, setShowDuplicateModal] = useState(false);
   const location = useLocation();
   const selected = location.state?.selected;
   const requestInfo = useRef(Object.keys(selected).length);
+  const resources = collection(db, 'Resources');
 
   const [newResourcePopulations, setNewResourcePopulations] = useState([]);
-  const [newResourceServices, setNewResourceServices] = useState([]);
+  const [newResourcePrograms, setNewResourcePrograms] = useState([]);
   const [newResourceProvider, setNewResourceProvider] = useState('');
   const [newResourceAddress, setNewResourceAddress] = useState('');
   const [newResourcePhone, setNewResourcePhone] = useState('');
@@ -34,6 +41,7 @@ function AddResource() {
   const [errors, setErrors] = useState({});
   const [programFilters, setProgramFilters] = useState([]);
   const [populationFilters, setPopulationFilters] = useState([]);
+  const [showPreview, setShowPreview] = useState(false);
 
   const onNewResourceChange = (type, value) => {
     switch (type) {
@@ -63,15 +71,27 @@ function AddResource() {
           setErrors({ ...errors, newResourceDescription: null });
         break;
       case 'populations':
-        setNewResourcePopulations({ ...newResourcePopulations, value });
+        if (!newResourcePopulations.includes(value)) {
+          setNewResourcePopulations([...newResourcePopulations, value]);
+        } else {
+          setNewResourcePopulations(
+            newResourcePopulations.filter((r) => r !== value)
+          );
+        }
         if (!errors[newResourcePopulations])
           setErrors({ ...errors, newResourcePopulations: null });
-          break;
+        break;
       case 'programs':
-        setNewResourcePopulations({ ...newResourceServices, value });
-        if (!errors[newResourceServices])
-          setErrors({ ...errors, newResourceServices: null });
-          break;
+        if (!newResourcePrograms.includes(value)) {
+          setNewResourcePrograms([...newResourcePrograms, value]);
+        } else {
+          setNewResourcePrograms(
+            newResourcePrograms.filter((r) => r !== value)
+          );
+        }
+        if (!errors[newResourcePrograms])
+          setErrors({ ...errors, newResourcePrograms: null });
+        break;
       default:
         break;
     }
@@ -96,8 +116,8 @@ function AddResource() {
     if (!newResourceDescription || newResourceDescription === '') {
       newErrors.newResourceDescription = 'Required';
     }
-    if (newResourceServices === []) {
-      newErrors.newResourceServices = 'You must select at least one program.';
+    if (newResourcePrograms === [] || newResourcePrograms.length === 0) {
+      newErrors.newResourcePrograms = 'You must select at least one program.';
     }
     if (newResourceWebsite !== '' && !newResourceWebsite.match(site)) {
       newErrors.newResourceWebsite = 'Please enter a valid URL.';
@@ -113,29 +133,65 @@ function AddResource() {
     setNewResourceProvider('');
     setNewResourceWebsite('');
     setNewResourcePopulations([]);
-    setNewResourceServices([]);
+    setNewResourcePrograms([]);
   };
 
-  const handleSubmitandClose = (e) => {
+  const resetForm = () => {
+    clearFormFields();
+    setShowPreview(false);
+  };
+
+  const closeModalAndReset = () => {
+    setShowDuplicateModal(false);
+    resetForm();
+  };
+
+  const handlePreview = (e) => {
     e.preventDefault();
     const newErrors = findFormErrors();
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
     } else {
-      const newResourceRef = addDoc(collection(db, 'Resources'), {
-        description: newResourceDescription,
-        phone: newResourcePhone,
-        provider: newResourceProvider,
-        address: newResourceAddress,
-        website: newResourceWebsite || null,
-        populationFilters: newResourcePopulations || null,
-        serviceFilters: newResourceServices,
-      }).then(() => {
-        // handleCloseNewResourceModal();
-        // handleShowSuccessModal();
-        clearFormFields();
-      });
+      setShowPreview(true);
+    }
+  };
+
+  const hasPops = () => {
+    if (newResourcePopulations.at(0) === '') {
+      return false;
+    } else if (newResourcePopulations.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const addNewResource = () => {
+    const newResourceRef = addDoc(resources, {
+      description: newResourceDescription,
+      phone: newResourcePhone,
+      provider: newResourceProvider,
+      address: newResourceAddress,
+      website: newResourceWebsite || null,
+      populationFilters: newResourcePopulations || null,
+      serviceFilters: newResourcePrograms,
+    }).then(() => {
+      resetForm();
+      setShowSuccessModal(true);
+    });
+  };
+
+  const handleSubmitNewResource = async () => {
+    // check for provider name first
+    const resourcesQuery = query(resources, where('provider', '==', newResourceProvider));
+    const resourcesSnapshot = await getCountFromServer(resourcesQuery);
+    const duplicateCount = resourcesSnapshot.data().count;
+    console.log(duplicateCount);
+    if (duplicateCount > 0) {
+      setShowDuplicateModal(true);
+    } else {
+      addNewResource();
     }
   };
 
@@ -196,125 +252,181 @@ function AddResource() {
         </Alert>
       ) : null}
       <Row>
-        <Form noValidate>
-          <Form.Group className="mb-3" controlId="newResourceForm.Provider">
-            <Form.Label>Resource Provider Name:</Form.Label>
-            <Form.Control
-              type="text"
-              value={newResourceProvider}
-              isInvalid={errors.newResourceProvider}
-              onChange={(e) => onNewResourceChange('provider', e.target.value)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.newResourceProvider}
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="newResourceForm.Address">
-            <Form.Label>Address:</Form.Label>
-            <Form.Control
-              type="text"
-              value={newResourceAddress}
-              isInvalid={errors.newResourceAddress}
-              onChange={(e) => onNewResourceChange('address', e.target.value)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.newResourceAddress}
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="newResourceForm.Phone">
-            <Form.Label>Phone:</Form.Label>
-            <Form.Control
-              type="tel"
-              value={newResourcePhone}
-              isInvalid={errors.newResourcePhone}
-              onChange={(e) => onNewResourceChange('phone', e.target.value)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.newResourcePhone}
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="newResourceForm.Website">
-            <Form.Label>Website Link (optional):</Form.Label>
-            <Form.Control
-              type="url"
-              value={newResourceWebsite}
-              isInvalid={errors.newResourceWebsite}
-              onChange={(e) => onNewResourceChange('website', e.target.value)}
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.newResourceWebsite}
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group className="mb-3" controlId="newResourceForm.Description">
-            <Form.Label>
-              Provide a short description of the resource.
-            </Form.Label>
-            <Form.Control
-              as="textarea"
-              rows={3}
-              value={newResourceDescription}
-              isInvalid={errors.newResourcePhone}
-              onChange={(e) =>
-                onNewResourceChange('description', e.target.value)
-              }
-            />
-            <Form.Control.Feedback type="invalid">
-              {errors.newResourceDescription}
-            </Form.Control.Feedback>
-          </Form.Group>
-          <Form.Group
-            className="mb-3"
-            controlId="newResourceForm.Populations"
-          >
-            <Form.Label className='pe-3'>Populations: </Form.Label>
-            {populationFilters.map((p) => (
-              <Form.Check
-                inline
-                type="checkbox"
-                label={p}
-                value={p}
-                name="newResourceFormPopulationsCheck"
-                id={p}
+        <Col>
+          <Form noValidate>
+            <Form.Group className="mb-3" controlId="newResourceForm.Provider">
+              <Form.Label>Resource Provider Name:</Form.Label>
+              <Form.Control
+                type="text"
+                value={newResourceProvider}
+                isInvalid={errors.newResourceProvider}
                 onChange={(e) =>
-                  onNewResourceChange('populations', e.target.value)
+                  onNewResourceChange('provider', e.target.value)
                 }
               />
-            ))}
-          </Form.Group>
-          <Form.Group
-            className="mb-3"
-            controlId="newResourceForm.Programs"
-          >
-            <Form.Label className='pe-3'>Programs: </Form.Label>
-            {programFilters.map((p) => (
-              <Form.Check
-                inline
-                type="checkbox"
-                label={p}
-                value={p}
-                name="newResourceFormProgramsCheck"
-                id={p}
-                isInvalid={errors.newResourceServices}
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourceProvider}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newResourceForm.Address">
+              <Form.Label>Address:</Form.Label>
+              <Form.Control
+                type="text"
+                value={newResourceAddress}
+                isInvalid={errors.newResourceAddress}
+                onChange={(e) => onNewResourceChange('address', e.target.value)}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourceAddress}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newResourceForm.Phone">
+              <Form.Label>Phone:</Form.Label>
+              <Form.Control
+                type="tel"
+                value={newResourcePhone}
+                isInvalid={errors.newResourcePhone}
+                onChange={(e) => onNewResourceChange('phone', e.target.value)}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourcePhone}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newResourceForm.Website">
+              <Form.Label>Website Link (optional):</Form.Label>
+              <Form.Control
+                type="url"
+                value={newResourceWebsite}
+                isInvalid={errors.newResourceWebsite}
+                onChange={(e) => onNewResourceChange('website', e.target.value)}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourceWebsite}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group
+              className="mb-3"
+              controlId="newResourceForm.Description"
+            >
+              <Form.Label>
+                Provide a short description of the resource.
+              </Form.Label>
+              <Form.Control
+                as="textarea"
+                rows={3}
+                value={newResourceDescription}
+                isInvalid={errors.newResourcePhone}
                 onChange={(e) =>
-                  onNewResourceChange('programs', e.target.value)
+                  onNewResourceChange('description', e.target.value)
                 }
               />
-            ))}
-            <Form.Control.Feedback type="invalid">
-              {errors.newResourceServices}
-            </Form.Control.Feedback>
-          </Form.Group>
-        </Form>
-        <Button
-          variant="secondary"
-          type="submit"
-          onClick={handleSubmitandClose}
-        >
-          Submit
-        </Button>
-        <Button variant="primary" onClick={() => clearFormFields()}>
-          Reset
-        </Button>
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourceDescription}
+              </Form.Control.Feedback>
+            </Form.Group>
+            <Form.Group
+              className="mb-3"
+              controlId="newResourceForm.Populations"
+            >
+              <Form.Label className="pe-3">
+                Populations (if applicable):{' '}
+              </Form.Label>
+              {populationFilters.map((p) => (
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label={p}
+                  value={p}
+                  name="newResourceFormPopulationsCheck"
+                  id={p}
+                  checked={newResourcePopulations.includes(p)}
+                  onChange={(e) =>
+                    onNewResourceChange('populations', e.target.value)
+                  }
+                />
+              ))}
+            </Form.Group>
+            <Form.Group className="mb-3" controlId="newResourceForm.Programs">
+              <Form.Label className="pe-3">Programs: </Form.Label>
+              {programFilters.map((p) => (
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label={p}
+                  value={p}
+                  name="newResourceFormProgramsCheck"
+                  id={p}
+                  isInvalid={errors.newResourcePrograms}
+                  checked={newResourcePrograms.includes(p)}
+                  onChange={(e) =>
+                    onNewResourceChange('programs', e.target.value)
+                  }
+                />
+              ))}
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourcePrograms}
+              </Form.Control.Feedback>
+            </Form.Group>
+          </Form>
+          <button
+            className="btn btn-secondary me-3"
+            type="submit"
+            onClick={handlePreview}
+            disabled={showPreview}
+          >
+            Preview
+          </button>
+          <Button variant="danger" onClick={() => resetForm()}>
+            Reset
+          </Button>
+        </Col>
+        {showPreview ? (
+          <Col>
+            <h4>Preview:</h4>
+            <Card>
+              <Card.Body className="text-bg-light">
+                <Card.Title>{newResourceProvider}</Card.Title>
+                <Card.Subtitle className="mb-3">
+                  {newResourceAddress}
+                </Card.Subtitle>
+                <Card.Text>
+                  {newResourceWebsite ? (
+                    <Card.Link href={newResourceWebsite} target="_blank">
+                      See Website <i className="bi bi-box-arrow-up-right"></i>
+                    </Card.Link>
+                  ) : null}
+                  <Card.Link href={`tel:` + newResourcePhone} target="_blank">
+                    Call {newResourcePhone}
+                  </Card.Link>
+                </Card.Text>
+                <Card.Text>{newResourceDescription}</Card.Text>
+                <h5>Programs:</h5>
+                {newResourcePrograms.map((s) => (
+                  <ListGroup key={s} horizontal className="filter-list m-1">
+                    <ListGroup.Item variant="primary">{s}</ListGroup.Item>
+                  </ListGroup>
+                ))}
+                {hasPops() ? (
+                  <>
+                    <h5>Populations:</h5>
+                    {newResourcePopulations.map((p) => (
+                      <ListGroup horizontal className="filter-list m-1">
+                        <ListGroup.Item variant="secondary">{p}</ListGroup.Item>
+                      </ListGroup>
+                    ))}
+                  </>
+                ) : null}
+              </Card.Body>
+              <Card.Footer>
+                <Alert variant="danger">
+                  You can still make changes to the resource in the form or reset the form to clear all fields. If all
+                  information is correct, select Add New Resource.
+                </Alert>
+                <Button className='w-100' onClick={() => handleSubmitNewResource()}>Add New Resource</Button>
+              </Card.Footer>
+            </Card>
+          </Col>
+        ) : null}
       </Row>
       {/* Return to admin dashboard button */}
       <Row className="mt-4 mb-2">
@@ -324,6 +436,33 @@ function AddResource() {
           </Button>
         </Col>
       </Row>
+      {/* Duplicate resource modal */}
+      <Modal show={showDuplicateModal} onHide={() => setShowDuplicateModal(false)}>
+        <Modal.Header>
+          <Modal.Title className="text-bg-light">Provider Already Exists</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-bg-light">A resource with this provider name already exists.</Modal.Body>
+        <Modal.Footer className=''>
+          <Button variant="secondary" onClick={() => setShowDuplicateModal(false)}>
+            <Link to="/admin/edit-resource" state={{ selected: {} }}>
+              Edit Existing Resource
+            </Link>
+          </Button>
+          <Button variant="secondary" onClick={() => setShowDuplicateModal(false)}>
+            Edit New Resource
+          </Button>
+          <Button variant="danger" onClick={closeModalAndReset}>
+            Reset Form
+          </Button>
+        </Modal.Footer>
+      </Modal>
+      {/* Success modal */}
+      <Modal show={showSuccessModal} onHide={() => setShowSuccessModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title className="text-bg-light">Success</Modal.Title>
+        </Modal.Header>
+        <Modal.Body className="text-bg-light">New resource added!</Modal.Body>
+      </Modal>
     </Container>
   );
 }
