@@ -146,6 +146,7 @@ function Admin() {
       <Container className="mt-5 pt-5">
         <h2>Admin Dashboard</h2>
         <Row xs={1} sm={2} lg={3} xl={4}>
+          {/* form/request review pages DONE */}
           <Col className='mb-4'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
@@ -168,6 +169,7 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
+          {/* add and edit resources DONE */}
           <Col className='mb-4'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
@@ -181,6 +183,7 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
+          {/* add and edit events DONE */}
           <Col className='mb-4'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
@@ -194,6 +197,7 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
+          {/* edit about page info NOT STARTED */}
           <Col className='mb-4 d-none'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
@@ -207,6 +211,7 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
+          {/* edit featured text NOT STARTED */}
           <Col className='mb-4 d-none'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
@@ -224,6 +229,7 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
+          {/* edit filters IN PROGRESS */}
           <Col className='mb-4 d-none'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
@@ -255,6 +261,7 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
+          {/* admin account edits NOT STARTED */}
           <Col className='mb-4 d-none'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">

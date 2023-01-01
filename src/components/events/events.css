@@ -3,6 +3,12 @@
   padding-bottom: 20px;
 }
 
+@media screen and (max-width: 600px) {
+  .event-calendar {
+    min-height: 300px;
+  }
+}
+
 .event-calendar {
   min-height: 600px;
 }

@@ -106,7 +106,7 @@ function ResourceCard(props) {
 
   return (
     <>
-      <Card>
+      <Card className='h-100'>
         <Card.Body className="text-bg-light">
           <Card.Title>{resource.provider}</Card.Title>
           <Card.Subtitle className="mb-3">{resource.address}</Card.Subtitle>
@@ -137,8 +137,9 @@ function ResourceCard(props) {
               ))}
             </>
           ) : null}
-          <Card.Text className="text-end">
-            <OverlayTrigger
+        </Card.Body>
+        <Card.Footer className="text-end">
+          <OverlayTrigger
               placement="bottom"
               overlay={<Tooltip>Request an edit</Tooltip>}
             >
@@ -150,8 +151,7 @@ function ResourceCard(props) {
                 <i className="bi bi-pencil-square"></i>
               </Button>
             </OverlayTrigger>
-          </Card.Text>
-        </Card.Body>
+        </Card.Footer>
       </Card>
       {/* Request an edit form modal */}
       <Modal show={showFormModal} onHide={handleCloseFormModal}>

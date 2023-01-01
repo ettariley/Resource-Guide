@@ -30,6 +30,23 @@
   background-color: #89b2ae;
 }
 
+.react-datetime-picker__inputGroup {
+  color: black;
+}
+
 .react-calendar__month-view__days__day--weekend {
   color: #89b2ae;
+}
+
+.accordion-button.collapsed {
+  background-color: #89b2ae;
+}
+
+.preview-cards {
+  text-decoration: none;
+  text-align: left;
+}
+
+.preview-cards:hover {
+  border: #89b2ae;
 }

@@ -7,6 +7,7 @@ import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Card from 'react-bootstrap/Card';
 import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 import Modal from 'react-bootstrap/Modal';
 import { Link, useLocation } from 'react-router-dom';
 import {
@@ -22,7 +23,6 @@ import {
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
-import { ToastContainer } from 'react-bootstrap';
 
 function EditResource() {
   const [showAlert, setShowAlert] = useState(false);
@@ -98,6 +98,7 @@ function EditResource() {
 
   const cancelEdits = () => {
     setReadOnly(true);
+    setErrors({});
     setResourceAddress('');
     setResourceDescription('');
     setResourcePhone('');
@@ -222,7 +223,6 @@ function EditResource() {
   };
 
   const saveEdits = (e) => {
-    // add more shit here
     e.preventDefault();
     const newErrors = findFormErrors();
 
@@ -244,6 +244,7 @@ function EditResource() {
     });
   };
 
+  // set alert information if there
   useEffect(() => {
     if (requestInfo.current > 0) {
       setShowAlert(true);

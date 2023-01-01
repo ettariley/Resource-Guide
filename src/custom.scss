@@ -4,11 +4,13 @@ $secondary: #89b2ae;
 $body-bg: #234257;
 $body-color: white;
 $headings-font-family: 'Alegreya Sans SC', sans-serif;
+$font-family-base: 'Lato', sans-serif;
 $nav-tabs-link-active-bg: $secondary;
 
 .btn:focus {
   color: $secondary;
 }
+
 
 // custom calendar stylings
 $out-of-range-bg-color: #e6e7e8;
