@@ -46,6 +46,8 @@ function Events() {
   const eventTagFilter = useRef('');
   const eventPopFilter = useRef('');
   let filteredArray = [];
+
+  const eventTags = useRef([]);
   // let filteredEvents = [];
 
   // methods for updating refs
@@ -138,9 +140,14 @@ function Events() {
   });
 
   // open and close modals
-  const handleCloseEventModal = () => setShowEventModal(false);
+  const handleCloseEventModal = () => {
+    eventTags.current = [];
+    setShowEventModal(false)
+  };
+
   const handleShowEventModal = (e) => {
     setEvent(e);
+    eventTags.current = e.tags;
     setShowEventModal(true);
   };
 
@@ -204,6 +211,34 @@ function Events() {
     }
   };
 
+  const hasTags = () => {
+    if (eventTags.current.at(0) === '') {
+      return false;
+    } else if (eventTags.current.length === 0) {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const hasPop = () => {
+    if (!event.population) {
+      return false;
+    } else if (event.population === "") {
+      return false;
+    } else {
+      return true;
+    }
+  };
+
+  const isPast = (endDate) => {
+    if (endDate <= new Date()) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
@@ -261,9 +296,6 @@ function Events() {
           <Row>
             <Col>
               <h4>Featured Events and Announcements</h4>
-              {/* <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
-                <p>{featuredEventText}</p>
-              </div> */}
               <Alert variant="secondary">{featuredEventText}</Alert>
             </Col>
           </Row>
@@ -331,6 +363,7 @@ function Events() {
             </Col>
           ) : null}
         </Row>
+        {/* Calendar */}
         <Row className="event-calendar">
           <Col>
             <Calendar
@@ -349,6 +382,9 @@ function Events() {
             <Modal.Title className="text-bg-light">{event.title}</Modal.Title>
           </Modal.Header>
           <Modal.Body className="text-bg-light">
+            {isPast(event.end) ? (
+              <Alert variant="danger">This event has ended.</Alert>
+            ) : null}
             <Card.Title>
               {getFormattedEventDates(event.start, event.end)}
             </Card.Title>
@@ -359,9 +395,9 @@ function Events() {
               Location: {event.location}
             </Card.Text>
             <Card.Text>{event.description}</Card.Text>
-            {event.population !== '' ? (
+            {hasPop() ? (
               <>
-                <h5>Populations:</h5>
+                <h5>Population:</h5>
                 <ListGroup horizontal className="m-1">
                   <ListGroup.Item variant="secondary">
                     {event.population}
@@ -369,6 +405,16 @@ function Events() {
                 </ListGroup>
               </>
             ) : null}
+            {hasTags() ? (
+                  <>
+                    <h5>Tag(s):</h5>
+                    {event.tags.map((t) => (
+                      <ListGroup horizontal className="filter-list m-1">
+                        <ListGroup.Item variant="secondary">{t}</ListGroup.Item>
+                      </ListGroup>
+                    ))}
+                  </>
+                ) : null}
             <h5>Learn More</h5>
             <Card.Text>
               {event.eventLink ? (
