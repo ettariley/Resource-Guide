@@ -55,7 +55,7 @@ function Footer() {
               </a>
             </Col>
           </Row>
-          <h6>Funded by grants from the East Tennessee Foundation & East Tennessee State University.</h6>
+          <h6 className='pt-1 pb-0'>Funded by grants from the East Tennessee Foundation & East Tennessee State University.</h6>
         </Col>
 
         <Col sm md="3" className="m-1 ms-2">
