@@ -11,17 +11,13 @@ import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Dropdown from 'react-bootstrap/Dropdown';
 import DropdownButton from 'react-bootstrap/DropdownButton';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 import Alert from 'react-bootstrap/Alert';
 import { Calendar, momentLocalizer } from 'react-big-calendar';
 import moment from 'moment';
 import SuccessModal from '../success-modal/success-modal';
-import {
-  query,
-  collection,
-  doc,
-  getDocs,
-  getDoc,
-} from 'firebase/firestore';
+import { query, collection, doc, getDocs, getDoc } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './events.css';
 import NewEventForm from './new-event-form';
@@ -31,6 +27,8 @@ function Events() {
   const [showEventModal, setShowEventModal] = useState(false);
   const [showNewEventModal, setShowNewEventModal] = useState(false);
   const [showSuccessModal, setShowSuccessModal] = useState(false);
+  const [showOfflineToast, setShowOfflineToast] = useState(false);
+  const [showOfflineNoCacheToast, setShowOfflineNoCacheToast] = useState(false);
   const [event, setEvent] = useState('');
   const [events, setEvents] = useState([]);
   const [filteredEvents, setFilteredEvents] = useState([]);
@@ -133,16 +131,47 @@ function Events() {
   };
 
   // Set featured text
-  const featuredTextQuery = query(doc(db, 'Featured-Texts', 'EventsPage'));
-  const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
-    setFeaturedEventText(textSnapshot.data().Text);
-    setDisplayFeaturedText(textSnapshot.data().display);
-  });
+  useEffect(() => {
+    if (navigator.onLine) {
+      const featuredTextQuery = query(doc(db, 'Featured-Texts', 'EventsPage'));
+      const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
+        setFeaturedEventText(textSnapshot.data().Text);
+        localStorage.setItem(
+          'featuredEvent',
+          JSON.stringify(textSnapshot.data().Text)
+        );
+        setDisplayFeaturedText(textSnapshot.data().display);
+        localStorage.setItem(
+          'displayFeaturedEvent',
+          JSON.stringify(textSnapshot.data().display)
+        );
+      });
+    } else {
+      if (localStorage.getItem('featuredEvent') !== '') {
+        const localFeaturedEvent = JSON.parse(
+          localStorage.getItem('featuredEvent')
+        );
+        setFeaturedEventText(localFeaturedEvent);
+        const localDisplayFeatured = JSON.parse(
+          localStorage.getItem('displayFeaturedEvent')
+        );
+        if (localDisplayFeatured === 'true') {
+          setFeaturedEventText(true);
+        } else {
+          setFeaturedEventText(false);
+        }
+        // showOfflineToast(true);
+      } else {
+        setShowOfflineNoCacheToast(true);
+      }
+    };
+  }, [])
+  
 
   // open and close modals
   const handleCloseEventModal = () => {
     eventTags.current = [];
-    setShowEventModal(false)
+    setShowEventModal(false);
   };
 
   const handleShowEventModal = (e) => {
@@ -224,7 +253,7 @@ function Events() {
   const hasPop = () => {
     if (!event.population) {
       return false;
-    } else if (event.population === "") {
+    } else if (event.population === '') {
       return false;
     } else {
       return true;
@@ -246,46 +275,87 @@ function Events() {
 
   // Set list of events
   useEffect(() => {
-    const eventList = collection(db, 'Events');
-    let eventsArray = [];
-    const eventsSnapshot = getDocs(eventList).then((eventsSnapshot) => {
-      eventsSnapshot.forEach((doc) => {
-        let data = doc.data();
-        eventsArray.push({
-          description: data.description,
-          end: data.end.toDate(),
-          eventHost: data.eventHost,
-          eventLink: data.eventLink,
-          hostPhone: data.hostPhone,
-          id: doc.id,
-          location: data.location,
-          population: data.population,
-          start: data.start.toDate(),
-          tags: data.tags,
-          title: data.title,
+    if (navigator.onLine) {
+      const eventList = collection(db, 'Events');
+      let eventsArray = [];
+      const eventsSnapshot = getDocs(eventList).then((eventsSnapshot) => {
+        eventsSnapshot.forEach((doc) => {
+          let data = doc.data();
+          eventsArray.push({
+            description: data.description,
+            end: data.end.toDate(),
+            eventHost: data.eventHost,
+            eventLink: data.eventLink,
+            hostPhone: data.hostPhone,
+            id: doc.id,
+            location: data.location,
+            population: data.population,
+            start: data.start.toDate(),
+            tags: data.tags,
+            title: data.title,
+          });
         });
+        setEvents(eventsArray);
+        setFilteredEvents(eventsArray);
+        localStorage.setItem('events', JSON.stringify(eventsArray));
       });
-      setEvents(eventsArray);
-      setFilteredEvents(eventsArray);
-    });
+    } else {
+      if (localStorage.getItem('events') !== []) {
+        const localEvents = JSON.parse(localStorage.getItem('events'));
+        setEvents(localEvents);
+        setFilteredEvents(localEvents);
+        setShowOfflineToast(true);
+      } else {
+        setShowOfflineNoCacheToast(true);
+      }
+    }
   }, []);
 
   // Set population filters list
   useEffect(() => {
-    const populationFilterQuery = query(doc(db, 'Filters', 'Populations'));
-    const populationsSnapshot = getDoc(populationFilterQuery).then(
-      (populationsSnapshot) => {
-        setPopulationFilters(populationsSnapshot.data().filters.sort());
+    if (navigator.onLine) {
+      const populationFilterQuery = query(doc(db, 'Filters', 'Populations'));
+      const populationsSnapshot = getDoc(populationFilterQuery).then(
+        (populationsSnapshot) => {
+          setPopulationFilters(populationsSnapshot.data().filters.sort());
+          localStorage.setItem(
+            'populations',
+            JSON.stringify(populationsSnapshot.data().filters.sort())
+          );
+        }
+      );
+    } else {
+      if (localStorage.getItem('populations') !== []) {
+        const localPopulations = JSON.parse(
+          localStorage.getItem('populations')
+        );
+        setPopulationFilters(localPopulations);
+      } else {
+        setShowOfflineNoCacheToast(true);
+        setPopulationFilters([]);
       }
-    );
+    }
   }, []);
 
   // Set tag filters list
   useEffect(() => {
-    const tagsFilterQuery = query(doc(db, 'Filters', 'EventTags'));
-    const tagsSnapshot = getDoc(tagsFilterQuery).then((tagsSnapshot) => {
-      setTagFilters(tagsSnapshot.data().tags.sort());
-    });
+    if (navigator.onLine) {
+      const tagsFilterQuery = query(doc(db, 'Filters', 'EventTags'));
+      const tagsSnapshot = getDoc(tagsFilterQuery).then((tagsSnapshot) => {
+        setTagFilters(tagsSnapshot.data().tags.sort());
+        localStorage.setItem(
+          'tags',
+          JSON.stringify(tagsSnapshot.data().tags.sort())
+        );
+      });
+    } else {
+      if (localStorage.getItem('tags') !== []) {
+        const localTags = JSON.parse(localStorage.getItem('tags'));
+        setTagFilters(localTags);
+      } else {
+        setShowOfflineNoCacheToast(true);
+      }
+    }
   }, []);
 
   return (
@@ -406,15 +476,15 @@ function Events() {
               </>
             ) : null}
             {hasTags() ? (
-                  <>
-                    <h5>Tag(s):</h5>
-                    {event.tags.map((t) => (
-                      <ListGroup horizontal className="filter-list m-1">
-                        <ListGroup.Item variant="secondary">{t}</ListGroup.Item>
-                      </ListGroup>
-                    ))}
-                  </>
-                ) : null}
+              <>
+                <h5>Tag(s):</h5>
+                {event.tags.map((t) => (
+                  <ListGroup horizontal className="filter-list m-1">
+                    <ListGroup.Item variant="secondary">{t}</ListGroup.Item>
+                  </ListGroup>
+                ))}
+              </>
+            ) : null}
             <h5>Learn More</h5>
             <Card.Text>
               {event.eventLink ? (
@@ -454,7 +524,10 @@ function Events() {
             <Modal.Title className="text-bg-light">Share an Event</Modal.Title>
           </Modal.Header>
           <Modal.Body className="text-bg-light">
-            <NewEventForm handleCloseNewEventModal={handleCloseNewEventModal} handleShowSuccessModal={handleShowSuccessModal} />
+            <NewEventForm
+              handleCloseNewEventModal={handleCloseNewEventModal}
+              handleShowSuccessModal={handleShowSuccessModal}
+            />
           </Modal.Body>
           <Modal.Footer>
             <Button variant="primary" onClick={handleCloseNewEventModal}>
@@ -467,6 +540,42 @@ function Events() {
           showSuccessModal={showSuccessModal}
           handleCloseSuccessModal={handleCloseSuccessModal}
         />
+        {/* Offline warning Toast */}
+        <ToastContainer className="p-3" position="top-end">
+          <Toast
+            onClose={() => setShowOfflineToast(false)}
+            show={showOfflineToast}
+            delay={3000}
+            autohide
+            bg="secondary"
+          >
+            <Toast.Header>
+              <strong className="me-auto">Offline</strong>
+            </Toast.Header>
+            <Toast.Body>
+              You are offline. Until you are online, you may not be viewing the
+              most updated information, and some parts of the page may not work.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
+        {/* Offline no cache warning Toast */}
+        <ToastContainer className="p-3" position="top-end">
+          <Toast
+            onClose={() => setShowOfflineNoCacheToast(false)}
+            show={showOfflineNoCacheToast}
+            delay={3000}
+            autohide
+            bg="secondary"
+          >
+            <Toast.Header>
+              <strong className="me-auto">Offline - No Data</strong>
+            </Toast.Header>
+            <Toast.Body>
+              You are offline and no data can be loaded. Please connect to the
+              internet to use this page.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
       </Container>
     </Fade>
   );

@@ -4,17 +4,17 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Button from 'react-bootstrap/Button';
 import Fade from 'react-bootstrap/Fade';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 // import { mockAboutText, mockAboutPartners } from '../mock-data';
 import { db } from '../../firebase';
-import {
-  query,
-  doc,
-  getDoc,
-} from 'firebase/firestore';
+import { query, doc, getDoc } from 'firebase/firestore';
 import './about.css';
 
 function About() {
   const [open, setOpen] = useState(false);
+  const [showOfflineToast, setShowOfflineToast] = useState(false);
+  const [showOfflineNoCacheToast, setShowOfflineNoCacheToast] = useState(false);
   const [partners, setPartners] = useState([]);
   const [aboutText, setAboutText] = useState([]);
 
@@ -30,17 +30,22 @@ function About() {
       const aboutTextSnapshot = getDoc(aboutTextQuery).then(
         (aboutTextSnapshot) => {
           setAboutText(aboutTextSnapshot.data().text);
-          localStorage.setItem('aboutFeaturedText', JSON.stringify(aboutTextSnapshot.data().text));
+          localStorage.setItem(
+            'aboutFeaturedText',
+            JSON.stringify(aboutTextSnapshot.data().text)
+          );
           // console.log(aboutText);
         }
       );
     } else {
-      if (localStorage.getItem('aboutFeaturedText') !== '') {
-        setAboutText(JSON.parse(localStorage.getItem('aboutFeaturedText')));
+      if (localStorage.getItem('aboutFeaturedText') !== []) {
+        const localFeaturedText = JSON.parse(localStorage.getItem('aboutFeaturedText'));
+        setAboutText(localFeaturedText);
+        console.log(aboutText);
       } else {
-        alert("No internet connection; can't load featured text.");
+        setShowOfflineNoCacheToast(true);
       }
-    } 
+    }
   }, []);
 
   // set about partners
@@ -50,17 +55,22 @@ function About() {
       const partnersQuerySnapshot = getDoc(partnersQuery).then(
         (partnersQuerySnapshot) => {
           setPartners(partnersQuerySnapshot.data().partners);
-          localStorage.setItem('aboutPartners', JSON.stringify(partnersQuerySnapshot.data().partners));
+          localStorage.setItem(
+            'aboutPartners',
+            JSON.stringify(partnersQuerySnapshot.data().partners)
+          );
         }
       );
     } else {
-      if (localStorage.getItem('aboutPartners')) {
-        setAboutText(JSON.parse(localStorage.getItem('aboutPartners')));
+      if (localStorage.getItem('aboutPartners') !== []) {
+        const localPartners = JSON.parse(localStorage.getItem('aboutPartners'));
+        setPartners(localPartners);
+        console.log(partners);
+        setShowOfflineToast(true);
       } else {
-        alert("No internet connection; can't load partners.");
+        setShowOfflineNoCacheToast(true);
       }
-    } 
-    
+    }
   }, []);
 
   return (
@@ -88,6 +98,42 @@ function About() {
             </Col>
           ))}
         </Row>
+        {/* Offline warning Toast */}
+        <ToastContainer className="p-3" position="top-end">
+          <Toast
+            onClose={() => setShowOfflineToast(false)}
+            show={showOfflineToast}
+            delay={3000}
+            autohide
+            bg="secondary"
+          >
+            <Toast.Header>
+              <strong className="me-auto">Offline</strong>
+            </Toast.Header>
+            <Toast.Body>
+              You are offline. Until you are online, you may not be viewing the
+              most updated information, and some parts of the page may not work.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
+        {/* Offline no cache warning Toast */}
+        <ToastContainer className="p-3" position="top-end">
+          <Toast
+            onClose={() => setShowOfflineNoCacheToast(false)}
+            show={showOfflineNoCacheToast}
+            delay={3000}
+            autohide
+            bg="secondary"
+          >
+            <Toast.Header>
+              <strong className="me-auto">Offline - No Data</strong>
+            </Toast.Header>
+            <Toast.Body>
+              You are offline and no data can be loaded. Please connect to the
+              internet to use this page.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
       </Container>
     </Fade>
   );
