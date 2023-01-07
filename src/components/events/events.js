@@ -156,9 +156,9 @@ function Events() {
           localStorage.getItem('displayFeaturedEvent')
         );
         if (localDisplayFeatured === 'true') {
-          setFeaturedEventText(true);
+          setDisplayFeaturedText(true);
         } else {
-          setFeaturedEventText(false);
+          setDisplayFeaturedText(false);
         }
         // showOfflineToast(true);
       } else {
@@ -181,7 +181,13 @@ function Events() {
   };
 
   const handleCloseNewEventModal = () => setShowNewEventModal(false);
-  const handleShowNewEventModal = () => setShowNewEventModal(true);
+  const handleShowNewEventModal = () => {
+    if (navigator.onLine) {
+      setShowNewEventModal(true);
+    } else {
+      alert("Cannot access while offline.");
+    }
+  };
 
   const handleCloseSuccessModal = () => setShowSuccessModal(false);
   const handleShowSuccessModal = () => setShowSuccessModal(true);
@@ -300,7 +306,7 @@ function Events() {
         localStorage.setItem('events', JSON.stringify(eventsArray));
       });
     } else {
-      if (localStorage.getItem('events') !== []) {
+      if (localStorage.getItem('events') && localStorage.getItem('events') !== []) {
         const localEvents = JSON.parse(localStorage.getItem('events'));
         setEvents(localEvents);
         setFilteredEvents(localEvents);
@@ -325,14 +331,14 @@ function Events() {
         }
       );
     } else {
-      if (localStorage.getItem('populations') !== []) {
+      if (localStorage.getItem('populations') && localStorage.getItem('populations') !== []) {
         const localPopulations = JSON.parse(
           localStorage.getItem('populations')
         );
         setPopulationFilters(localPopulations);
       } else {
         setShowOfflineNoCacheToast(true);
-        setPopulationFilters([]);
+        // setPopulationFilters([]);
       }
     }
   }, []);
@@ -349,7 +355,7 @@ function Events() {
         );
       });
     } else {
-      if (localStorage.getItem('tags') !== []) {
+      if (localStorage.getItem('tags') && localStorage.getItem('tags') !== []) {
         const localTags = JSON.parse(localStorage.getItem('tags'));
         setTagFilters(localTags);
       } else {
@@ -545,7 +551,7 @@ function Events() {
           <Toast
             onClose={() => setShowOfflineToast(false)}
             show={showOfflineToast}
-            delay={3000}
+            delay={6000}
             autohide
             bg="secondary"
           >
@@ -563,12 +569,12 @@ function Events() {
           <Toast
             onClose={() => setShowOfflineNoCacheToast(false)}
             show={showOfflineNoCacheToast}
-            delay={3000}
+            delay={6000}
             autohide
             bg="secondary"
           >
             <Toast.Header>
-              <strong className="me-auto">Offline - No Data</strong>
+              <strong className="me-auto">Offline (No Data)</strong>
             </Toast.Header>
             <Toast.Body>
               You are offline and no data can be loaded. Please connect to the

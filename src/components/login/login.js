@@ -5,6 +5,7 @@ import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
 import Form from 'react-bootstrap/Form';
 import Modal from 'react-bootstrap/Modal';
+import Alert from 'react-bootstrap/Alert';
 import { useNavigate } from 'react-router-dom';
 import {
   signInWithEmailAndPassword,
@@ -18,6 +19,7 @@ function Login() {
   const [password, setPassword] = useState('');
   const navigate = useNavigate();
   const [showFPModal, setShowFPModal] = useState(false);
+  const [connected, setConnected] = useState(true);
 
   const handleCloseFPModal = () => setShowFPModal(false);
   const handleShowFPModal = () => setShowFPModal(true);
@@ -55,6 +57,12 @@ function Login() {
     setOpen(true);
   }, []);
 
+  useEffect(() => {
+    if (!navigator.onLine) {
+      setConnected(false);
+    }
+  }, []);
+
   // useEffect(() => {
   //   if (sessionStorage.getItem('Auth Token')) {
   //     navigate('/admin');
@@ -65,7 +73,7 @@ function Login() {
     <Fade in={open}>
       <Container className="mt-5 pt-5">
         <h2>Admin Login</h2>
-        <Card>
+        <Card className='mb-2'>
           <Card.Body className="text-bg-light">
             <Card.Title>Login</Card.Title>
             <Form>
@@ -89,12 +97,15 @@ function Login() {
                 />
                 {/* <Form.Text><Button variant='link' onClick={handleShowFPModal}>Forgot Password?</Button></Form.Text> */}
               </Form.Group>
-              <Button variant="primary" type="submit" onClick={(e) => logInAdmin(e, email, password)}>
+              <Button variant="primary" type="submit" onClick={(e) => logInAdmin(e, email, password)} disabled={!connected}>
                 Submit
               </Button>
             </Form>
           </Card.Body>
         </Card>
+        {!connected ? (
+          <Alert variant='danger' className='mb-2'>Cannot access the admin without an internet connection.</Alert>
+        ) : null}
         <Modal show={showFPModal} onHide={handleCloseFPModal}>
           <Modal.Header closeButton>
             <Modal.Title>Forgot Password</Modal.Title>

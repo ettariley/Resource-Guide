@@ -9,6 +9,8 @@ import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Alert from 'react-bootstrap/Alert';
+import Toast from 'react-bootstrap/Toast';
+import ToastContainer from 'react-bootstrap/ToastContainer';
 import ResourceCard from '../resource-card/resource-card';
 import SuccessModal from '../success-modal/success-modal';
 import {
@@ -30,6 +32,8 @@ function Resources() {
   const [resourcesList, setResourcesList] = useState([]);
   const [filteredResources, setFilteredResources] = useState([]);
   const [featuredResourcesText, setFeaturedResourcesText] = useState('');
+  const [showOfflineToast, setShowOfflineToast] = useState(false);
+  const [showOfflineNoCacheToast, setShowOfflineNoCacheToast] = useState(false);
   const [displayFeaturedResourcesText, setDisplayFeaturedResourcesText] =
     useState(false);
   // for new resource form
@@ -65,15 +69,45 @@ function Resources() {
   };
 
   // Set featured text
-  const featuredTextQuery = query(doc(db, 'Featured-Texts', 'ResourcePage'));
-  const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
-    setFeaturedResourcesText(textSnapshot.data().Text);
-    setDisplayFeaturedResourcesText(textSnapshot.data().display);
-  });
+  useEffect(() => {
+    if (navigator.onLine) {
+      const featuredTextQuery = query(doc(db, 'Featured-Texts', 'ResourcePage'));
+      const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
+        setFeaturedResourcesText(textSnapshot.data().Text);
+        localStorage.setItem('featuredResource', JSON.stringify(textSnapshot.data().Text));
+        setDisplayFeaturedResourcesText(textSnapshot.data().display);
+        localStorage.setItem('displayFeaturedResource', JSON.stringify(textSnapshot.data().display));
+      });
+    } else {
+      if (localStorage.getItem('featuredResource') !== '') {
+        const localFeaturedResource = JSON.parse(
+          localStorage.getItem('featuredResource')
+        );
+        setFeaturedResourcesText(localFeaturedResource);
+        const localDisplayFeatured = JSON.parse(
+          localStorage.getItem('displayFeaturedResource')
+        );
+        if (localDisplayFeatured === 'true') {
+          setDisplayFeaturedResourcesText(true);
+        } else {
+          setDisplayFeaturedResourcesText(false);
+        }
+        // showOfflineToast(true);
+      } else {
+        setShowOfflineNoCacheToast(true);
+      }
+    };
+  }, [])
 
   // Methods for opening & closing modals
   const handleCloseNewResourceModal = () => setShowNewResourceModal(false);
-  const handleShowNewResourceModal = () => setShowNewResourceModal(true);
+  const handleShowNewResourceModal = () => {
+    if (navigator.onLine) {
+      setShowNewResourceModal(true);
+    } else {
+      alert("Cannot access while offline.");
+    }
+  };
 
   const handleCloseSuccessModal = () => setShowSuccessModal(false);
   const handleShowSuccessModal = () => setShowSuccessModal(true);
@@ -251,50 +285,92 @@ function Resources() {
 
   // set list of resources on first render
   useEffect(() => {
-    // Set resources and blank array
-    const resources = collection(db, 'Resources');
-    const resourcesArray = [];
-    // get resources in order from database and push to array
-    const resourcesQuery = query(resources, orderBy('provider'));
-    const resourcesQSnapshot = getDocs(resourcesQuery).then(
-      (resourcesQSnapshot) => {
-        resourcesQSnapshot.forEach((doc) => {
-          let data = doc.data();
-          resourcesArray.push({
-            address: data.address,
-            description: data.description,
-            id: doc.id,
-            phone: data.phone,
-            populationFilters: data.populationFilters,
-            provider: data.provider,
-            serviceFilters: data.serviceFilters,
-            website: data.website,
+    if (navigator.onLine) {
+      // Set resources and blank array
+      const resources = collection(db, 'Resources');
+      const resourcesArray = [];
+      // get resources in order from database and push to array
+      const resourcesQuery = query(resources, orderBy('provider'));
+      const resourcesQSnapshot = getDocs(resourcesQuery).then(
+        (resourcesQSnapshot) => {
+          resourcesQSnapshot.forEach((doc) => {
+            let data = doc.data();
+            resourcesArray.push({
+              address: data.address,
+              description: data.description,
+              id: doc.id,
+              phone: data.phone,
+              populationFilters: data.populationFilters,
+              provider: data.provider,
+              serviceFilters: data.serviceFilters,
+              website: data.website,
+            });
           });
-        });
-        setResourcesList(resourcesArray);
-        setFilteredResources(resourcesArray);
+          setResourcesList(resourcesArray);
+          setFilteredResources(resourcesArray);
+          localStorage.setItem('resources', JSON.stringify(resourcesArray));
+        }
+      );
+    } else {
+      if (localStorage.getItem('resources') && localStorage.getItem('resources') !== []) {
+        const localResources = JSON.parse(localStorage.getItem('resources'));
+        setResourcesList(localResources);
+        setFilteredResources(localResources);
+        setShowOfflineToast(true);
+      } else {
+        setShowOfflineNoCacheToast(true);
       }
-    );
+    }
+    
   }, []);
 
   // Set program filters list
   useEffect(() => {
-    const programFilterQuery = query(doc(db, 'Filters', 'Programs'));
-    const programsSnapshot = getDoc(programFilterQuery).then(
-      (programsSnapshot) => {
-        setProgramFilters(programsSnapshot.data().filters.sort());
+    if (navigator.onLine) {
+      const programFilterQuery = query(doc(db, 'Filters', 'Programs'));
+      const programsSnapshot = getDoc(programFilterQuery).then(
+        (programsSnapshot) => {
+          setProgramFilters(programsSnapshot.data().filters.sort());
+          localStorage.setItem('programs', JSON.stringify(programsSnapshot.data().filters.sort()));
+        }
+      );
+    } else {
+      if (localStorage.getItem('programs') && localStorage.getItem('programs') !== []) {
+        const localPrograms = JSON.parse(localStorage.getItem('programs'));
+        setProgramFilters(localPrograms);
+        setShowOfflineToast(true);
+      } else {
+        setShowOfflineNoCacheToast(true);
       }
-    );
+    }
+    
   }, []);
 
   // Set population filters list
   useEffect(() => {
-    const populationFilterQuery = query(doc(db, 'Filters', 'Populations'));
-    const populationsSnapshot = getDoc(populationFilterQuery).then(
-      (populationsSnapshot) => {
-        setPopulationFilters(populationsSnapshot.data().filters.sort());
+    if (navigator.onLine) {
+      const populationFilterQuery = query(doc(db, 'Filters', 'Populations'));
+      const populationsSnapshot = getDoc(populationFilterQuery).then(
+        (populationsSnapshot) => {
+          setPopulationFilters(populationsSnapshot.data().filters.sort());
+          localStorage.setItem(
+            'populations',
+            JSON.stringify(populationsSnapshot.data().filters.sort())
+          );
+        }
+      );
+    } else {
+      if (localStorage.getItem('populations') && localStorage.getItem('populations') !== []) {
+        const localPopulations = JSON.parse(
+          localStorage.getItem('populations')
+        );
+        setPopulationFilters(localPopulations);
+        setShowOfflineToast(true);
+      } else {
+        setShowOfflineNoCacheToast(true);
+        // setPopulationFilters([]);
       }
-    );
+    }
   }, []);
 
   return (
@@ -540,6 +616,42 @@ function Resources() {
           showSuccessModal={showSuccessModal}
           handleCloseSuccessModal={handleCloseSuccessModal}
         />
+        {/* Offline warning Toast */}
+        <ToastContainer className="p-3" position="top-end">
+          <Toast
+            onClose={() => setShowOfflineToast(false)}
+            show={showOfflineToast}
+            delay={6000}
+            autohide
+            bg="secondary"
+          >
+            <Toast.Header>
+              <strong className="me-auto">Offline</strong>
+            </Toast.Header>
+            <Toast.Body>
+              You are offline. Until you are online, you may not be viewing the
+              most updated information, and some parts of the page may not work.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
+        {/* Offline no cache warning Toast */}
+        <ToastContainer className="p-3" position="top-end">
+          <Toast
+            onClose={() => setShowOfflineNoCacheToast(false)}
+            show={showOfflineNoCacheToast}
+            delay={6000}
+            autohide
+            bg="secondary"
+          >
+            <Toast.Header>
+              <strong className="me-auto">Offline (No Data)</strong>
+            </Toast.Header>
+            <Toast.Body>
+              You are offline and no data can be loaded. Please connect to the
+              internet to use this page.
+            </Toast.Body>
+          </Toast>
+        </ToastContainer>
       </Container>
     </Fade>
   );

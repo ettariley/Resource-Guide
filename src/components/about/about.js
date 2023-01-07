@@ -38,7 +38,7 @@ function About() {
         }
       );
     } else {
-      if (localStorage.getItem('aboutFeaturedText') !== []) {
+      if (localStorage.getItem('aboutFeaturedText') && localStorage.getItem('aboutFeaturedText') !== []) {
         const localFeaturedText = JSON.parse(localStorage.getItem('aboutFeaturedText'));
         setAboutText(localFeaturedText);
         console.log(aboutText);
@@ -62,7 +62,7 @@ function About() {
         }
       );
     } else {
-      if (localStorage.getItem('aboutPartners') !== []) {
+      if (localStorage.getItem('aboutPartners') && localStorage.getItem('aboutPartners') !== []) {
         const localPartners = JSON.parse(localStorage.getItem('aboutPartners'));
         setPartners(localPartners);
         console.log(partners);
@@ -103,7 +103,7 @@ function About() {
           <Toast
             onClose={() => setShowOfflineToast(false)}
             show={showOfflineToast}
-            delay={3000}
+            delay={6000}
             autohide
             bg="secondary"
           >
@@ -121,7 +121,7 @@ function About() {
           <Toast
             onClose={() => setShowOfflineNoCacheToast(false)}
             show={showOfflineNoCacheToast}
-            delay={3000}
+            delay={6000}
             autohide
             bg="secondary"
           >

@@ -7,3 +7,7 @@
   font-family: "Alegreya Sans SC", sans-serif;
   font-weight: 500;
 }
+
+.toast {
+  z-index: 1;
+}

@@ -78,7 +78,13 @@ function ResourceCard(props) {
   };
 
   const handleCloseFormModal = () => setShowFormModal(false);
-  const handleShowFormModal = () => setShowFormModal(true);
+  const handleShowFormModal = () => {
+    if (navigator.onLine) {
+      setShowFormModal(true);
+    } else {
+      alert("Cannot access while offline.");
+    }
+  };
 
   const handleCloseSuccessModal = () => setShowSuccessModal(false);
   const handleShowSuccessModal = () => setShowSuccessModal(true);
