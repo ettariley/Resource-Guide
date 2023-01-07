@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
@@ -8,12 +8,8 @@ import Fade from 'react-bootstrap/Fade';
 import { db } from '../../firebase';
 import {
   query,
-  orderBy,
-  collection,
   doc,
-  getDocs,
   getDoc,
-  onSnapshot,
 } from 'firebase/firestore';
 import './about.css';
 
