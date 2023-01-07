@@ -50,7 +50,7 @@ function About() {
       const partnersQuerySnapshot = getDoc(partnersQuery).then(
         (partnersQuerySnapshot) => {
           setPartners(partnersQuerySnapshot.data().partners);
-          localStorage.setItem('aboutPartners', JSON.stringify(partners));
+          localStorage.setItem('aboutPartners', JSON.stringify(partnersQuerySnapshot.data().partners));
         }
       );
     } else {
