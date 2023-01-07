@@ -1,12 +1,18 @@
-import React from 'react';
+import React, { useState, useRef } from 'react';
 import Container from 'react-bootstrap/Container';
 import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 import Image from 'react-bootstrap/Image';
+import Overlay from 'react-bootstrap/Overlay';
+import Tooltip from 'react-bootstrap/Tooltip';
+import Button from 'react-bootstrap/Button';
 import { NavLink } from 'react-router-dom';
 import './footer.css';
 
 function Footer() {
+  const [show, setShow] = useState(false);
+  const target = useRef(null);
+
   return (
     <Container fluid className="text-bg-dark bg-secondary">
       <Row className="p-3 justify-content-around">
@@ -55,7 +61,10 @@ function Footer() {
               </a>
             </Col>
           </Row>
-          <h6 className='pt-1 pb-0'>Funded by grants from the East Tennessee Foundation & East Tennessee State University.</h6>
+          <h6 className="pt-1 pb-0">
+            Funded by grants from the East Tennessee Foundation & East Tennessee
+            State University.
+          </h6>
         </Col>
 
         <Col sm md="3" className="m-1 ms-2">
@@ -69,8 +78,24 @@ function Footer() {
           <Row>
             <NavLink to="/about">About</NavLink>
           </Row>
+          <Button
+            variant="link"
+            ref={target}
+            onClick={() => setShow(!show)}
+            className="text-start text-white ps-0 pe-0 pt-1 pb-1"
+          >
+            <h5>Add Hamblen Resource Guide to your home screen</h5>
+          </Button>
         </Col>
       </Row>
+      <Overlay target={target.current} show={show} placement="top">
+        <Tooltip id="add-to-home-screen-tooltip">
+          On your mobile device, look for the{' '}
+          <i className="bi bi-box-arrow-up"></i> or similar icon and select Add
+          to Home Screen. This will add the Resource Guide to your device just
+          like a regular app!
+        </Tooltip>
+      </Overlay>
     </Container>
   );
 }
