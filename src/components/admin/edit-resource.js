@@ -38,6 +38,7 @@ function EditResource() {
   const [resourceAddress, setResourceAddress] = useState('');
   const [resourcePhone, setResourcePhone] = useState('');
   const [resourceWebsite, setResourceWebsite] = useState('');
+  const [resourceEmail, setResourceEmail] = useState('');
   const [resourceDescription, setResourceDescription] = useState('');
   const [errors, setErrors] = useState({});
 
@@ -71,6 +72,7 @@ function EditResource() {
           resourcesArray.push({
             address: data.address,
             description: data.description,
+            email: data.email,
             id: doc.id,
             phone: data.phone,
             populationFilters: data.populationFilters,
@@ -93,6 +95,7 @@ function EditResource() {
     setResourceProvider(resource.provider);
     setResourcePrograms(resource.serviceFilters);
     setResourceWebsite(resource.website);
+    setResourceEmail(resource.email);
     setReadOnly(false);
   };
 
@@ -106,6 +109,7 @@ function EditResource() {
     setResourceProvider('');
     setResourcePrograms([]);
     setResourceWebsite('');
+    setResourceEmail('');
   };
 
   const updateReadOnly = () => {
@@ -116,6 +120,7 @@ function EditResource() {
       provider: resourceProvider,
       address: resourceAddress,
       website: resourceWebsite || null,
+      email: resourceEmail || null,
       populationFilters: resourcePopulations || null,
       serviceFilters: resourcePrograms,
     });
@@ -142,6 +147,11 @@ function EditResource() {
         setResourceWebsite(value);
         if (!errors[resourceWebsite])
           setErrors({ ...errors, resourceWebsite: null });
+        break;
+      case 'email':
+        setResourceEmail(value);
+        if (!errors[resourceEmail])
+          setErrors({ ...errors, resourceEmail: null });
         break;
       case 'description':
         setResourceDescription(value);
@@ -177,8 +187,9 @@ function EditResource() {
 
   const findFormErrors = () => {
     const newErrors = {};
-    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    const site = /^(ftp|http|https):\/\/[^ "]+$/;
+    const phoneno = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
+    const email = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const site = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!resourceProvider || resourceProvider === '') {
       newErrors.resourceProvider = 'Required';
     }
@@ -187,20 +198,24 @@ function EditResource() {
     }
     if (!resourcePhone || resourcePhone === '') {
       newErrors.resourcePhone = 'Required';
-    } else if (resourcePhone !== '' && !resourcePhone.match(phoneno)) {
+    } else if (resourcePhone !== '' && !phoneno.test(resourcePhone)) {
       newErrors.resourcePhone =
-        'Phone number should be in 123-456-7890 or 123.456.7890 format.';
+        'Phone number should be in 123-456-7890 format.';
     }
     if (!resourceDescription || resourceDescription === '') {
       newErrors.resourceDescription = 'Required';
+    } else if (resourceDescription.length > 250) {
+      newErrors.resourceDescription = 'Descriptions should be less than 250 characters.';
     }
     if (resourcePrograms === [] || resourcePrograms.length === 0) {
       newErrors.resourcePrograms = 'You must select at least one program.';
     }
-    if (resourceWebsite !== '' && !resourceWebsite.match(site)) {
+    if (resourceWebsite !== '' && !site.test(resourceWebsite)) {
       newErrors.resourceWebsite = 'Please enter a valid URL.';
     }
-
+    if (resourceEmail !== '' && !email.test(resourceEmail)) {
+      newErrors.resourceEmail = 'Please enter a valid email.'
+    }
     return newErrors;
   };
 
@@ -212,6 +227,7 @@ function EditResource() {
       provider: resourceProvider,
       address: resourceAddress,
       website: resourceWebsite || null,
+      email: resourceEmail || null,
       populationFilters: resourcePopulations || null,
       serviceFilters: resourcePrograms,
     }).then(() => {
@@ -228,6 +244,7 @@ function EditResource() {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      console.log(errors);
     } else {
       updateResource();
     };
@@ -349,7 +366,7 @@ function EditResource() {
                     placeholder={resource.address}
                     readOnly={readOnly}
                     value={resourceAddress}
-                    isInvalid={errors.newResourceAddress}
+                    isInvalid={errors.resourceAddress}
                     onChange={(e) => onResourceChange('address', e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
@@ -363,7 +380,7 @@ function EditResource() {
                     placeholder={resource.phone}
                     value={resourcePhone}
                     readOnly={readOnly}
-                    isInvalid={errors.newResourcePhone}
+                    isInvalid={errors.resourcePhone}
                     onChange={(e) => onResourceChange('phone', e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
@@ -380,11 +397,28 @@ function EditResource() {
                     placeholder={resource.website}
                     value={resourceWebsite}
                     readOnly={readOnly}
-                    isInvalid={errors.newResourceWebsite}
+                    isInvalid={errors.resourceWebsite}
                     onChange={(e) => onResourceChange('website', e.target.value)}
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.resourceWebsite}
+                  </Form.Control.Feedback>
+                </Form.Group>
+                <Form.Group
+                  className="mb-3"
+                  controlId="editResourceForm.email"
+                >
+                  <Form.Label>Email: </Form.Label>
+                  <Form.Control
+                    type="text"
+                    placeholder={resource.email}
+                    value={resourceEmail}
+                    readOnly={readOnly}
+                    isInvalid={errors.resourceEmail}
+                    onChange={(e) => onResourceChange('email', e.target.value)}
+                  />
+                  <Form.Control.Feedback type="invalid">
+                    {errors.resourceEmail}
                   </Form.Control.Feedback>
                 </Form.Group>
                 <Form.Group
@@ -398,7 +432,7 @@ function EditResource() {
                     placeholder={resource.description}
                     value={resourceDescription}
                     readOnly={readOnly}
-                    isInvalid={errors.newResourcePhone}
+                    isInvalid={errors.resourcePhone}
                     onChange={(e) =>
                       onResourceChange('description', e.target.value)
                     }

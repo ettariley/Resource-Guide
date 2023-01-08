@@ -37,10 +37,10 @@ function PrintCards(props) {
             </Card.Link>
           </Row>
         ) : null}
-        {resource.website ? (
+        {resource.email ? (
           <Row>
-            <Card.Link href={resource.website} target="_blank">
-              ettahaselden@gmail.com
+            <Card.Link href={`mailto:` + resource.email} target="_blank">
+              {resource.email}
             </Card.Link>
           </Row>
         ) : null}

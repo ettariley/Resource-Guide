@@ -66,12 +66,13 @@ function NewEventForm(props) {
       default:
         break;
     }
-    console.log(errors);
+    // console.log(errors);
   };
 
   const findFormErrors = () => {
     const newErrors = {};
     var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    const site = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!newEventIdentifier || newEventIdentifier === '') {
       newErrors.newEventIdentifier = 'Required';
     }
@@ -101,7 +102,9 @@ function NewEventForm(props) {
     if (!newEventDescription || newEventDescription === '') {
       newErrors.newEventDescription = 'Required';
     }
-
+    if (newEventLink !== '' && !site.test(newEventLink)) {
+      newErrors.newEventLink = 'Please enter a valid website.';
+    }
     return newErrors;
   };
 
@@ -259,9 +262,13 @@ function NewEventForm(props) {
           type="url"
           name="newEventLink"
           value={newEventLink}
-          onChange={(e) => onFormChange('end', e.target.value)}
+          isInvalid={errors.newEventLink}
+          onChange={(e) => onFormChange('link', e.target.value)}
         />
         <Form.Text muted>Optional</Form.Text>
+        <Form.Control.Feedback type="invalid">
+          {errors.newEventLink}
+        </Form.Control.Feedback>
       </Form.Group>
       <Form.Group className="mb-3" controlId="newEventForm.Description">
         <Form.Label>Provide a short description of the event.</Form.Label>

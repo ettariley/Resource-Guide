@@ -37,6 +37,7 @@ function AddResource() {
   const [newResourceAddress, setNewResourceAddress] = useState('');
   const [newResourcePhone, setNewResourcePhone] = useState('');
   const [newResourceWebsite, setNewResourceWebsite] = useState('');
+  const [newResourceEmail, setNewResourceEmail] = useState('');
   const [newResourceDescription, setNewResourceDescription] = useState('');
   const [errors, setErrors] = useState({});
   const [programFilters, setProgramFilters] = useState([]);
@@ -64,6 +65,12 @@ function AddResource() {
         setNewResourceWebsite(value);
         if (!errors[newResourceWebsite])
           setErrors({ ...errors, newResourceWebsite: null });
+        break;
+      case 'email':
+        setNewResourceEmail(value);
+        if (!errors[newResourceEmail]) {
+          setErrors({ ...errors, newResourceEmail: null });
+        }
         break;
       case 'description':
         setNewResourceDescription(value);
@@ -99,8 +106,9 @@ function AddResource() {
 
   const findFormErrors = () => {
     const newErrors = {};
-    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
-    const site = /^(ftp|http|https):\/\/[^ "]+$/;
+    const phoneno = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
+    const email = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
+    const site = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!newResourceProvider || newResourceProvider === '') {
       newErrors.newResourceProvider = 'Required';
     }
@@ -111,10 +119,12 @@ function AddResource() {
       newErrors.newResourcePhone = 'Required';
     } else if (newResourcePhone !== '' && !newResourcePhone.match(phoneno)) {
       newErrors.newResourcePhone =
-        'Phone number should be in 123-456-7890 or 123.456.7890 format.';
+        'Phone number should be in 123-456-7890 format.';
     }
     if (!newResourceDescription || newResourceDescription === '') {
       newErrors.newResourceDescription = 'Required';
+    } else if (newResourceDescription.length > 250) {
+      newErrors.newResourceDescription = 'Descriptions should be less than 250 characters.';
     }
     if (newResourcePrograms === [] || newResourcePrograms.length === 0) {
       newErrors.newResourcePrograms = 'You must select at least one program.';
@@ -122,7 +132,9 @@ function AddResource() {
     if (newResourceWebsite !== '' && !newResourceWebsite.match(site)) {
       newErrors.newResourceWebsite = 'Please enter a valid URL.';
     }
-
+    if (newResourceEmail !== '' && !email.test(newResourceEmail)) {
+      newErrors.newResourceEmail = 'Please enter a valid email.'
+    }
     return newErrors;
   };
 
@@ -132,12 +144,14 @@ function AddResource() {
     setNewResourcePhone('');
     setNewResourceProvider('');
     setNewResourceWebsite('');
+    setNewResourceEmail('');
     setNewResourcePopulations([]);
     setNewResourcePrograms([]);
   };
 
   const resetForm = () => {
     clearFormFields();
+    setErrors({});
     setShowPreview(false);
   };
 
@@ -174,6 +188,7 @@ function AddResource() {
       provider: newResourceProvider,
       address: newResourceAddress,
       website: newResourceWebsite || null,
+      email: newResourceEmail || null,
       populationFilters: newResourcePopulations || null,
       serviceFilters: newResourcePrograms,
     }).then(() => {
@@ -249,12 +264,14 @@ function AddResource() {
           Phone: {selected.phone}
           <br></br>
           Website: {selected.website}
+          <br></br>
+          Email: {selected.email}
         </Alert>
       ) : null}
       <Row>
         <Col>
           <Form noValidate>
-            <Form.Group className="mb-3" controlId="newResourceForm.Provider">
+            <Form.Group className="mb-2" controlId="newResourceForm.Provider">
               <Form.Label>Resource Provider Name:</Form.Label>
               <Form.Control
                 type="text"
@@ -268,7 +285,7 @@ function AddResource() {
                 {errors.newResourceProvider}
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group className="mb-3" controlId="newResourceForm.Address">
+            <Form.Group className="mb-2" controlId="newResourceForm.Address">
               <Form.Label>Address:</Form.Label>
               <Form.Control
                 type="text"
@@ -280,7 +297,7 @@ function AddResource() {
                 {errors.newResourceAddress}
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group className="mb-3" controlId="newResourceForm.Phone">
+            <Form.Group className="mb-2" controlId="newResourceForm.Phone">
               <Form.Label>Phone:</Form.Label>
               <Form.Control
                 type="tel"
@@ -292,7 +309,7 @@ function AddResource() {
                 {errors.newResourcePhone}
               </Form.Control.Feedback>
             </Form.Group>
-            <Form.Group className="mb-3" controlId="newResourceForm.Website">
+            <Form.Group className="mb-2" controlId="newResourceForm.Website">
               <Form.Label>Website Link (optional):</Form.Label>
               <Form.Control
                 type="url"
@@ -304,8 +321,20 @@ function AddResource() {
                 {errors.newResourceWebsite}
               </Form.Control.Feedback>
             </Form.Group>
+            <Form.Group className="mb-2" controlId="newResourceForm.Email">
+              <Form.Label>Email (optional):</Form.Label>
+              <Form.Control
+                type="email"
+                value={newResourceEmail}
+                isInvalid={errors.newResourceEmail}
+                onChange={(e) => onNewResourceChange('email', e.target.value)}
+              />
+              <Form.Control.Feedback type="invalid">
+                {errors.newResourceEmail}
+              </Form.Control.Feedback>
+            </Form.Group>
             <Form.Group
-              className="mb-3"
+              className="mb-2"
               controlId="newResourceForm.Description"
             >
               <Form.Label>
@@ -325,7 +354,7 @@ function AddResource() {
               </Form.Control.Feedback>
             </Form.Group>
             <Form.Group
-              className="mb-3"
+              className="mb-2"
               controlId="newResourceForm.Populations"
             >
               <Form.Label className="pe-3">
@@ -346,7 +375,7 @@ function AddResource() {
                 />
               ))}
             </Form.Group>
-            <Form.Group className="mb-3" controlId="newResourceForm.Programs">
+            <Form.Group className="mb-2" controlId="newResourceForm.Programs">
               <Form.Label className="pe-3">Programs: </Form.Label>
               {programFilters.map((p) => (
                 <Form.Check

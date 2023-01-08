@@ -1,5 +1,6 @@
 import React, { useRef, useState } from 'react';
 import Button from 'react-bootstrap/Button';
+import Row from 'react-bootstrap/Row';
 import Card from 'react-bootstrap/Card';
 import ListGroup from 'react-bootstrap/ListGroup';
 import Modal from 'react-bootstrap/Modal';
@@ -60,7 +61,7 @@ function ResourceCard(props) {
 
   const findFormErrors = () => {
     const newErrors = {};
-    var phoneno = /^\(?([0-9]{3})\)?[-. ]?([0-9]{3})[-. ]?([0-9]{4})$/;
+    var phoneno = /^\(?([0-9]{3})\)?[-.]?([0-9]{3})[-.]?([0-9]{4})$/;
     if (!formIdentifier || formIdentifier === '') {
       newErrors.formIdentifier = 'Required';
     }
@@ -116,7 +117,7 @@ function ResourceCard(props) {
         <Card.Body className="text-bg-light">
           <Card.Title>{resource.provider}</Card.Title>
           <Card.Subtitle className="mb-3">{resource.address}</Card.Subtitle>
-          <Card.Text>
+          <Card.Text className='mb-0'>
             {resource.website ? (
               <Card.Link href={resource.website} target="_blank">
                 See Website
@@ -126,7 +127,14 @@ function ResourceCard(props) {
               Call {resource.phone}
             </Card.Link>
           </Card.Text>
-          <Card.Text>{resource.description}</Card.Text>
+          {resource.email ? (
+            <Card.Text className='mb-0'>
+              <Card.Link href={`mailto:` + resource.email} target="_blank">
+                Email {resource.email}
+              </Card.Link>
+            </Card.Text>
+          ) : null}
+          <Card.Text className='mt-3'>{resource.description}</Card.Text>
           <h5>Services:</h5>
           {resourceServ.current.map((s) => (
             <ListGroup key={s} horizontal className="filter-list m-1">
