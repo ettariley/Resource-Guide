@@ -7,13 +7,13 @@ import Col from 'react-bootstrap/Col';
 import Badge from 'react-bootstrap/Badge';
 import Button from 'react-bootstrap/Button';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAtom } from 'jotai';
-import {
-  programFiltersAtom,
-  programsLengthAtom,
-  currentFilterListAtom,
-  currentFilterTypeAtom,
-} from '../../atoms';
+// import { useAtom } from 'jotai';
+// import {
+//   programFiltersAtom,
+//   programsLengthAtom,
+//   currentFilterListAtom,
+//   currentFilterTypeAtom,
+// } from '../../atoms';
 import FilterModal from './filter-modal';
 import EditResourceRequests from './edit-resource-requests';
 import ResourceRequests from './resource-requests';
@@ -28,12 +28,12 @@ import { db } from '../../firebase';
 function Admin() {
   const [open, setOpen] = useState(false);
   const [showFilterModal, setShowFilterModal] = useState(false);
-  const [programFilters, setProgramFilters] = useAtom(programFiltersAtom);
-  const [programsLength] = useAtom(programsLengthAtom);
+  // const [programFilters, setProgramFilters] = useAtom(programFiltersAtom);
+  // const [programsLength] = useAtom(programsLengthAtom);
   const [populationFilters, setPopulationFilters] = useState([]);
   const [eventTags, setEventTags] = useState([]);
-  const [filterList, setFilterList] = useAtom(currentFilterListAtom);
-  const [filterType, setFilterType] = useAtom(currentFilterTypeAtom);
+  // const [filterList, setFilterList] = useAtom(currentFilterListAtom);
+  // const [filterType, setFilterType] = useAtom(currentFilterTypeAtom);
   const [unreadNewResources, setUnreadNewResources] = useState('');
   const [unreadNewEvents, setUnreadNewEvents] = useState('');
   const [unreadEditResource, setUnreadEditResource] = useState('');
@@ -44,30 +44,30 @@ function Admin() {
   const handleCloseFilterModal = () => setShowFilterModal(false);
   const handleShowFilterModal = () => setShowFilterModal(true);
 
-  const displayList = (filterCategory) => {
-    let filters = [''];
-    switch (filterCategory) {
-      case 'Populations':
-        filters = populationFilters;
-        break;
-      case 'Programs':
-        filters = programFilters;
-        break;
-      case 'Event Tags':
-        filters = eventTags;
-        break;
-      default:
-        filters = [''];
-        break;
-    }
-    console.log(filters);
-    console.log(filterCategory);
-    setFilterList([...filters]);
-    setFilterType(filterCategory);
-    console.log(filterList);
+  // const displayList = (filterCategory) => {
+  //   let filters = [''];
+  //   switch (filterCategory) {
+  //     case 'Populations':
+  //       filters = populationFilters;
+  //       break;
+  //     case 'Programs':
+  //       filters = programFilters;
+  //       break;
+  //     case 'Event Tags':
+  //       filters = eventTags;
+  //       break;
+  //     default:
+  //       filters = [''];
+  //       break;
+  //   }
+  //   console.log(filters);
+  //   console.log(filterCategory);
+  //   setFilterList([...filters]);
+  //   setFilterType(filterCategory);
+  //   console.log(filterList);
 
-    handleShowFilterModal();
-  };
+  //   handleShowFilterModal();
+  // };
 
   // Check auth
   useEffect(() => {
@@ -80,18 +80,18 @@ function Admin() {
   }, []);
 
   // Set program filters list
-  useEffect(() => {
-    console.log(programsLength);
-    if (programsLength === 0) {
-      const programFilterQuery = query(doc(db, 'Filters', 'Programs'));
-      const programsSnapshot = getDoc(programFilterQuery).then(
-        (programsSnapshot) => {
-          setProgramFilters(programsSnapshot.data().filters.sort());
-        }
-      );
-    }
-    console.log(programFilters);
-  }, []);
+  // useEffect(() => {
+  //   console.log(programsLength);
+  //   if (programsLength === 0) {
+  //     const programFilterQuery = query(doc(db, 'Filters', 'Programs'));
+  //     const programsSnapshot = getDoc(programFilterQuery).then(
+  //       (programsSnapshot) => {
+  //         setProgramFilters(programsSnapshot.data().filters.sort());
+  //       }
+  //     );
+  //   }
+  //   console.log(programFilters);
+  // }, []);
 
   // Set unread badges
   useEffect(() => {
@@ -243,12 +243,12 @@ function Admin() {
                   </Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button
+                  {/* <Button
                     variant="secondary"
                     onClick={() => displayList('Programs')}
                   >
                     Edit Program Filters
-                  </Button>
+                  </Button> */}
                 </Card.Text>
                 <Card.Text>
                   <Button
