@@ -6,3 +6,24 @@
 .toast {
   z-index: 1;
 }
+
+.print-list {
+  display: none;
+}
+
+.print-link {
+  text-decoration: none;
+  color: white;
+}
+
+.print-link:hover {
+  color: #89b2ae;
+}
+
+@media print {
+  .no-print { display: none;}
+  .print-cards {width: 48vw; height: 50vh;}
+  .print-container {padding-top: 5px; margin-top: 0px;}
+  .print-list {display: flex;}
+  .print-title {color: black; margin-bottom: 6px;}
+}

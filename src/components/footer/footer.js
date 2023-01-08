@@ -14,7 +14,7 @@ function Footer() {
   const target = useRef(null);
 
   return (
-    <Container fluid className="text-bg-dark bg-secondary">
+    <Container fluid className="text-bg-dark bg-secondary no-print">
       <Row className="p-3 justify-content-around">
         <Col sm md="3" className="m-1 me-2">
           <h4>Contact Us</h4>

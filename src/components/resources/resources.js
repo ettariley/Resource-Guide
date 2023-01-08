@@ -13,6 +13,7 @@ import Toast from 'react-bootstrap/Toast';
 import ToastContainer from 'react-bootstrap/ToastContainer';
 import ResourceCard from '../resource-card/resource-card';
 import SuccessModal from '../success-modal/success-modal';
+import PrintCards from './print-cards';
 import {
   query,
   orderBy,
@@ -71,12 +72,20 @@ function Resources() {
   // Set featured text
   useEffect(() => {
     if (navigator.onLine) {
-      const featuredTextQuery = query(doc(db, 'Featured-Texts', 'ResourcePage'));
+      const featuredTextQuery = query(
+        doc(db, 'Featured-Texts', 'ResourcePage')
+      );
       const textSnapshot = getDoc(featuredTextQuery).then((textSnapshot) => {
         setFeaturedResourcesText(textSnapshot.data().Text);
-        localStorage.setItem('featuredResource', JSON.stringify(textSnapshot.data().Text));
+        localStorage.setItem(
+          'featuredResource',
+          JSON.stringify(textSnapshot.data().Text)
+        );
         setDisplayFeaturedResourcesText(textSnapshot.data().display);
-        localStorage.setItem('displayFeaturedResource', JSON.stringify(textSnapshot.data().display));
+        localStorage.setItem(
+          'displayFeaturedResource',
+          JSON.stringify(textSnapshot.data().display)
+        );
       });
     } else {
       if (localStorage.getItem('featuredResource') !== '') {
@@ -96,8 +105,8 @@ function Resources() {
       } else {
         setShowOfflineNoCacheToast(true);
       }
-    };
-  }, [])
+    }
+  }, []);
 
   // Methods for opening & closing modals
   const handleCloseNewResourceModal = () => setShowNewResourceModal(false);
@@ -105,7 +114,7 @@ function Resources() {
     if (navigator.onLine) {
       setShowNewResourceModal(true);
     } else {
-      alert("Cannot access while offline.");
+      alert('Cannot access while offline.');
     }
   };
 
@@ -278,6 +287,10 @@ function Resources() {
     }
   };
 
+  const printResources = () => {
+    window.print();
+  };
+
   useEffect(() => {
     window.scrollTo(0, 0);
     setOpen(true);
@@ -312,7 +325,10 @@ function Resources() {
         }
       );
     } else {
-      if (localStorage.getItem('resources') && localStorage.getItem('resources') !== []) {
+      if (
+        localStorage.getItem('resources') &&
+        localStorage.getItem('resources') !== []
+      ) {
         const localResources = JSON.parse(localStorage.getItem('resources'));
         setResourcesList(localResources);
         setFilteredResources(localResources);
@@ -321,7 +337,6 @@ function Resources() {
         setShowOfflineNoCacheToast(true);
       }
     }
-    
   }, []);
 
   // Set program filters list
@@ -331,11 +346,17 @@ function Resources() {
       const programsSnapshot = getDoc(programFilterQuery).then(
         (programsSnapshot) => {
           setProgramFilters(programsSnapshot.data().filters.sort());
-          localStorage.setItem('programs', JSON.stringify(programsSnapshot.data().filters.sort()));
+          localStorage.setItem(
+            'programs',
+            JSON.stringify(programsSnapshot.data().filters.sort())
+          );
         }
       );
     } else {
-      if (localStorage.getItem('programs') && localStorage.getItem('programs') !== []) {
+      if (
+        localStorage.getItem('programs') &&
+        localStorage.getItem('programs') !== []
+      ) {
         const localPrograms = JSON.parse(localStorage.getItem('programs'));
         setProgramFilters(localPrograms);
         setShowOfflineToast(true);
@@ -343,7 +364,6 @@ function Resources() {
         setShowOfflineNoCacheToast(true);
       }
     }
-    
   }, []);
 
   // Set population filters list
@@ -360,7 +380,10 @@ function Resources() {
         }
       );
     } else {
-      if (localStorage.getItem('populations') && localStorage.getItem('populations') !== []) {
+      if (
+        localStorage.getItem('populations') &&
+        localStorage.getItem('populations') !== []
+      ) {
         const localPopulations = JSON.parse(
           localStorage.getItem('populations')
         );
@@ -375,10 +398,10 @@ function Resources() {
 
   return (
     <Fade in={open}>
-      <Container className="resources">
-        <h2>Resources</h2>
+      <Container className="resources print-container">
+        <h2 className='print-title'>Resources</h2>
         {displayFeaturedResourcesText ? (
-          <Row>
+          <Row className="no-print">
             <Col>
               <h4>Featured Programs and Announcements</h4>
               {/* <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
@@ -388,7 +411,7 @@ function Resources() {
             </Col>
           </Row>
         ) : null}
-        <Row className="mt-3 mb-3">
+        <Row className="mt-3 mb-3 no-print">
           <Col md="auto">
             <h5 className="mt-2">Search and Filter: </h5>
           </Col>
@@ -434,7 +457,7 @@ function Resources() {
           </Col>
         </Row>
         {/* Show selected filters */}
-        <Row>
+        <Row className="no-print">
           {progFilter.current !== '' ? (
             <Col xs="auto" className="pb-2">
               <Button
@@ -457,15 +480,20 @@ function Resources() {
           ) : null}
         </Row>
         {/* Resource List */}
-        <Row className="pt-2">
+        <Row className="pt-2 pb-2 no-print">
           {filteredResources.map((r) => (
             <Col sm="6" lg="4" className="mt-2">
               <ResourceCard key={r.id} resource={r} />
             </Col>
           ))}
         </Row>
+        <Button variant='link' onClick={printResources} className="no-print ps-0 print-link">
+          <h4 className="mb-0">
+            <i className="bi bi-printer-fill"></i>  Print Resource List
+          </h4>
+        </Button>
         {/* Share a new resource */}
-        <Row className="mt-2 pt-2 pb-2">
+        <Row className="pt-2 pb-2 no-print">
           <Col>
             <h4>Do you know of a resource that isn't on this list?</h4>
             <Button variant="secondary" onClick={handleShowNewResourceModal}>
@@ -652,6 +680,16 @@ function Resources() {
             </Toast.Body>
           </Toast>
         </ToastContainer>
+        {/* Resource List for Printing */}
+        <Row className="print-list">
+          <h6 className='text-bg-light mt-0 mb-1'>Provided by hamblenresourceguide.org</h6>
+          {filteredResources.map((r) => (
+            <Col sm="6" lg="4" className="print-cards ps-1 pe-1">
+              <PrintCards key={r.id} resource={r} />
+            </Col>
+          ))}
+          {/* <p className='print-title'>List provided from www.hamblenresourceguide.org</p> */}
+        </Row>
       </Container>
     </Fade>
   );

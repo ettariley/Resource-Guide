@@ -6,3 +6,7 @@
 .btn:focus {
   box-shadow: none;
 }
+
+@media print {
+  .no-print { display: none;}
+}

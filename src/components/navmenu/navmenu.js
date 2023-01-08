@@ -5,7 +5,8 @@ import Nav from 'react-bootstrap/Nav';
 import Navbar from 'react-bootstrap/Navbar';
 import NavDropdown from 'react-bootstrap/NavDropdown';
 import { Link, useNavigate } from 'react-router-dom';
-import { auth } from '../firebase';
+import { auth } from '../../firebase';
+import './navmenu.css';
 
 function NavMenu(props) {
   const { loggedIn, setLoggedIn } = props;
@@ -15,31 +16,50 @@ function NavMenu(props) {
     signOut(auth);
     // setLoggedIn(false);
     sessionStorage.removeItem('Auth Token');
-    navigate("/");
+    navigate('/');
   };
 
   return (
-    <Navbar collapseOnSelect fixed="top" variant="dark" bg="secondary" expand="md">
+    <Navbar
+      collapseOnSelect
+      fixed="top"
+      variant="dark"
+      bg="secondary"
+      expand="md"
+      className='no-print'
+    >
       <Container>
         <Navbar.Brand href="/">
-          <img src={require('../assets/HRGlogo.png')} height="60" alt='Hamblen Resource Guide Logo' />
+          <img
+            src={require('../../assets/HRGlogo.png')}
+            height="60"
+            alt="Hamblen Resource Guide Logo"
+          />
         </Navbar.Brand>
         <Navbar.Toggle aria-controls="basic-navbar-nav" />
         <Navbar.Collapse id="basic-navbar-nav" className="justify-content-end">
           <Nav>
-            <Nav.Link eventKey='1' as={Link} to="/">
+            <Nav.Link eventKey="1" as={Link} to="/">
               Resources
             </Nav.Link>
-            <Nav.Link eventKey='2' as={Link} to="/events">
+            <Nav.Link eventKey="2" as={Link} to="/events">
               Events
             </Nav.Link>
-            <Nav.Link eventKey='3' as={Link} to="/about">
+            <Nav.Link eventKey="3" as={Link} to="/about">
               About
             </Nav.Link>
-            {(sessionStorage.getItem('Auth Token')) ? (
-              <NavDropdown title='Admin' id='admin-dropdown'>
-                <NavDropdown.Item eventKey='4' as={Link} to="/admin">Dashboard</NavDropdown.Item>
-                <NavDropdown.Item  className='link-danger' eventKey='5' onClick={() => logOutAdmin()}>Log Out</NavDropdown.Item>
+            {sessionStorage.getItem('Auth Token') ? (
+              <NavDropdown title="Admin" id="admin-dropdown">
+                <NavDropdown.Item eventKey="4" as={Link} to="/admin">
+                  Dashboard
+                </NavDropdown.Item>
+                <NavDropdown.Item
+                  className="link-danger"
+                  eventKey="5"
+                  onClick={() => logOutAdmin()}
+                >
+                  Log Out
+                </NavDropdown.Item>
               </NavDropdown>
             ) : null}
           </Nav>
