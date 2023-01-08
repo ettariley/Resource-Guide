@@ -1,10 +1,7 @@
-import React, { useState } from 'react';
-import {
-  Routes,
-  Route,
-} from "react-router-dom";
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
 import Container from 'react-bootstrap/Container';
-import NavMenu from './components/navmenu';
+import NavMenu from './components/navmenu/navmenu';
 import Footer from './components/footer/footer';
 import About from './components/about/about';
 import Events from './components/events/events';
@@ -21,7 +18,6 @@ import AddResource from './components/admin/add-resource';
 import EditResource from './components/admin/edit-resource';
 
 function App() {
-
   return (
     <Container fluid className="App d-flex flex-column justify-content-between">
       <div>
@@ -31,19 +27,25 @@ function App() {
           <Route path="/about" element={<About />} />
           <Route path="/events" element={<Events />} />
           <Route path="/admin" element={<Admin />} />
-          <Route path='admin/edit-requests' element={<EditResourceRequests />} />
-          <Route path='admin/event-requests' element={<EventRequests />} />
-          <Route path='admin/resource-requests' element={<ResourceRequests />} />
-          <Route path='admin/add-event' element={<AddEvent />} />
-          <Route path='admin/edit-event' element={<EditEvent />} />
-          <Route path='admin/add-resource' element={<AddResource />} />
-          <Route path='admin/edit-resource' element={<EditResource />} />
+          <Route
+            path="admin/edit-requests"
+            element={<EditResourceRequests />}
+          />
+          <Route path="admin/event-requests" element={<EventRequests />} />
+          <Route
+            path="admin/resource-requests"
+            element={<ResourceRequests />}
+          />
+          <Route path="admin/add-event" element={<AddEvent />} />
+          <Route path="admin/edit-event" element={<EditEvent />} />
+          <Route path="admin/add-resource" element={<AddResource />} />
+          <Route path="admin/edit-resource" element={<EditResource />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </div>
-      <Footer className='footer' />
+      <Footer className="footer" />
     </Container>
-    );
+  );
 }
 
 export default App;
