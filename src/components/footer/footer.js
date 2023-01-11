@@ -20,11 +20,11 @@ function Footer() {
           <h4>Contact Us</h4>
           <Row>
             <a
-              href="mailto:ettahaselden@gmail.com"
+              href="mailto:contact@hamblenresourceguide.org"
               title="Email"
               target="_blank"
             >
-              ettahaselden@gmail.com
+              contact@hamblenresourceguide.org
             </a>
           </Row>
           <Row>
