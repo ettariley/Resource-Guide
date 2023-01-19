@@ -211,18 +211,18 @@ function Admin() {
               </Card.Body>
             </Card>
           </Col>
-          {/* edit featured text NOT STARTED */}
-          <Col className='mb-4 d-none'>
+          {/* edit featured text DONE */}
+          <Col className='mb-4'>
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Featured text</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary">
+                  <Button variant="secondary" as={Link} to="edit-featured-resources">
                     Edit on Resources Page
                   </Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary">
+                  <Button variant="secondary" as={Link} to="edit-featured-events">
                     Edit on Events Page
                   </Button>
                 </Card.Text>
