@@ -17,6 +17,7 @@ import {
   updateDoc,
   deleteDoc,
   getDocs,
+  getDoc,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
@@ -237,6 +238,22 @@ function EventRequests() {
     });
   };
 
+  const markAsRead = () => {
+    const eventDocReadRef = doc(events, selected.id);
+    const readSnapshot = getDoc(eventDocReadRef).then(() => {
+      if (!readSnapshot.read) {
+        updateDoc(eventDocReadRef, {
+          read: true,
+        }).then(() => {
+          setSelected((selected) => ({
+            ...selected,
+            read: true,
+          }));
+        });
+      }
+    });
+  };
+
   const handleDeleteRequest = () => {
     const eventDocReadRef = doc(events, selected.id);
     deleteDoc(eventDocReadRef).then(() => {
@@ -335,7 +352,7 @@ function EventRequests() {
               </button>
             </Col>
             <Col className="border-start border-end">
-              <button className="btn btn-link" disabled={disabled}>
+              <button className="btn btn-link" disabled={disabled} onClick={() => markAsRead()}>
                 <Link to="/admin/add-event" state={{ selected: selected }}>Add New Event</Link>
               </button>
             </Col>
