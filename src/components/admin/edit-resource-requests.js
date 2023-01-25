@@ -17,6 +17,7 @@ import {
   updateDoc,
   deleteDoc,
   getDocs,
+  getDoc,
 } from 'firebase/firestore';
 import { db } from '../../firebase';
 import './admin.css';
@@ -209,6 +210,22 @@ function EditResourceRequests() {
     });
   };
 
+  const markAsRead = () => {
+    const editDocReadRef = doc(edits, selected.id);
+    const readSnapshot = getDoc(editDocReadRef).then(() => {
+      if (!readSnapshot.read) {
+        updateDoc(editDocReadRef, {
+          read: true,
+        }).then(() => {
+          setSelected((selected) => ({
+            ...selected,
+            read: true,
+          }));
+        });
+      }
+    });
+  };
+
   const handleDeleteRequest = () => {
     const editDocReadRef = doc(edits, selected.id);
     deleteDoc(editDocReadRef).then(() => {
@@ -309,7 +326,7 @@ function EditResourceRequests() {
               </button>
             </Col>
             <Col className="border-start border-end">
-              <button className="btn btn-link" disabled={disabled}>
+              <button className="btn btn-link" disabled={disabled} onClick={() => markAsRead()}>
                 <Link to="/admin/edit-resource" state={{ selected: selected }}>
                   Edit Resource
                 </Link>
