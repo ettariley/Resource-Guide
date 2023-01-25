@@ -29,6 +29,7 @@ function AddResource() {
   const location = useLocation();
   const selected = location.state?.selected;
   const requestInfo = useRef(Object.keys(selected).length);
+  const characters = useRef(0);
   const resources = collection(db, 'Resources');
 
   const [newResourcePopulations, setNewResourcePopulations] = useState([]);
@@ -74,6 +75,7 @@ function AddResource() {
         break;
       case 'description':
         setNewResourceDescription(value);
+        characters.current = value.length;
         if (!errors[newResourceDescription])
           setErrors({ ...errors, newResourceDescription: null });
         break;
@@ -108,7 +110,8 @@ function AddResource() {
     const newErrors = {};
     const phoneno = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
     const email = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    const site = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+    const site =
+      /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!newResourceProvider || newResourceProvider === '') {
       newErrors.newResourceProvider = 'Required';
     }
@@ -124,7 +127,8 @@ function AddResource() {
     if (!newResourceDescription || newResourceDescription === '') {
       newErrors.newResourceDescription = 'Required';
     } else if (newResourceDescription.length > 250) {
-      newErrors.newResourceDescription = 'Descriptions should be less than 250 characters.';
+      newErrors.newResourceDescription =
+        'Descriptions should be less than 250 characters.';
     }
     if (newResourcePrograms === [] || newResourcePrograms.length === 0) {
       newErrors.newResourcePrograms = 'You must select at least one program.';
@@ -133,9 +137,17 @@ function AddResource() {
       newErrors.newResourceWebsite = 'Please enter a valid URL.';
     }
     if (newResourceEmail !== '' && !email.test(newResourceEmail)) {
-      newErrors.newResourceEmail = 'Please enter a valid email.'
+      newErrors.newResourceEmail = 'Please enter a valid email.';
     }
     return newErrors;
+  };
+
+  const over250 = () => {
+    if (characters.current > 250) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   const clearFormFields = () => {
@@ -193,13 +205,17 @@ function AddResource() {
       serviceFilters: newResourcePrograms,
     }).then(() => {
       resetForm();
+      setShowAlert(false);
       setShowSuccessModal(true);
     });
   };
 
   const handleSubmitNewResource = async () => {
     // check for provider name first
-    const resourcesQuery = query(resources, where('provider', '==', newResourceProvider));
+    const resourcesQuery = query(
+      resources,
+      where('provider', '==', newResourceProvider)
+    );
     const resourcesSnapshot = await getCountFromServer(resourcesQuery);
     const duplicateCount = resourcesSnapshot.data().count;
     console.log(duplicateCount);
@@ -344,11 +360,21 @@ function AddResource() {
                 as="textarea"
                 rows={3}
                 value={newResourceDescription}
-                isInvalid={errors.newResourcePhone}
+                isInvalid={errors.newResourceDescription}
                 onChange={(e) =>
                   onNewResourceChange('description', e.target.value)
                 }
               />
+              {over250() ? (
+                <Form.Text
+                  className="text-danger"
+                  style={{ fontSize: '0.875em' }}
+                >
+                  {characters.current}/250
+                </Form.Text>
+              ) : (
+                <Form.Text muted>{characters.current}/250</Form.Text>
+              )}
               <Form.Control.Feedback type="invalid">
                 {errors.newResourceDescription}
               </Form.Control.Feedback>
@@ -448,10 +474,16 @@ function AddResource() {
               </Card.Body>
               <Card.Footer>
                 <Alert variant="danger">
-                  You can still make changes to the resource in the form or reset the form to clear all fields. If all
-                  information is correct, select Add New Resource.
+                  You can still make changes to the resource in the form or
+                  reset the form to clear all fields. If all information is
+                  correct, select Add New Resource.
                 </Alert>
-                <Button className='w-100' onClick={() => handleSubmitNewResource()}>Add New Resource</Button>
+                <Button
+                  className="w-100"
+                  onClick={() => handleSubmitNewResource()}
+                >
+                  Add New Resource
+                </Button>
               </Card.Footer>
             </Card>
           </Col>
@@ -466,18 +498,31 @@ function AddResource() {
         </Col>
       </Row>
       {/* Duplicate resource modal */}
-      <Modal show={showDuplicateModal} onHide={() => setShowDuplicateModal(false)}>
+      <Modal
+        show={showDuplicateModal}
+        onHide={() => setShowDuplicateModal(false)}
+      >
         <Modal.Header>
-          <Modal.Title className="text-bg-light">Provider Already Exists</Modal.Title>
+          <Modal.Title className="text-bg-light">
+            Provider Already Exists
+          </Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-bg-light">A resource with this provider name already exists.</Modal.Body>
-        <Modal.Footer className=''>
-          <Button variant="secondary" onClick={() => setShowDuplicateModal(false)}>
+        <Modal.Body className="text-bg-light">
+          A resource with this provider name already exists.
+        </Modal.Body>
+        <Modal.Footer className="">
+          <Button
+            variant="secondary"
+            onClick={() => setShowDuplicateModal(false)}
+          >
             <Link to="/admin/edit-resource" state={{ selected: {} }}>
               Edit Existing Resource
             </Link>
           </Button>
-          <Button variant="secondary" onClick={() => setShowDuplicateModal(false)}>
+          <Button
+            variant="secondary"
+            onClick={() => setShowDuplicateModal(false)}
+          >
             Edit New Resource
           </Button>
           <Button variant="danger" onClick={closeModalAndReset}>
