@@ -197,6 +197,7 @@ function AddEvent() {
       tags: newEventTags || null,
     }).then(() => {
       resetForm();
+      setShowAlert(false);
       setShowSuccessModal(true);
     });
   };
@@ -584,7 +585,9 @@ function AddEvent() {
                     ))}
                   </>
                 ) : null}
-                <h5>Learn More</h5>
+                {newEventLink || newEventPhone ? (
+                  <h5>Learn More</h5>
+                ) : null}
                 <Card.Text>
                   {newEventLink ? (
                     <Card.Link href={newEventLink} target="_blank">
@@ -661,7 +664,7 @@ function AddEvent() {
         <Modal.Header closeButton>
           <Modal.Title className="text-bg-light">Success</Modal.Title>
         </Modal.Header>
-        <Modal.Body className="text-bg-light">New resource added!</Modal.Body>
+        <Modal.Body className="text-bg-light">New event added!</Modal.Body>
       </Modal>
     </Container>
   );
