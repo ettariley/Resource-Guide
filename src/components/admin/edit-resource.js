@@ -48,6 +48,7 @@ function EditResource() {
 
   const searchText = useRef('');
   const searchLength = useRef(-1);
+  const characters = useRef(0);
 
   const resources = collection(db, 'Resources');
 
@@ -83,6 +84,7 @@ function EditResource() {
         });
         setResource(resourcesArray[0]);
         searchLength.current = Object.keys(resourcesArray).length;
+        characters.current = resource.description.length;
       }
     );
   };
@@ -155,6 +157,7 @@ function EditResource() {
         break;
       case 'description':
         setResourceDescription(value);
+        characters.current = value.length;
         if (!errors[resourceDescription])
           setErrors({ ...errors, resourceDescription: null });
         break;
@@ -173,9 +176,7 @@ function EditResource() {
         if (!resourcePrograms.includes(value)) {
           setResourcePrograms([...resourcePrograms, value]);
         } else {
-          setResourcePrograms(
-            resourcePrograms.filter((r) => r !== value)
-          );
+          setResourcePrograms(resourcePrograms.filter((r) => r !== value));
         }
         if (!errors[resourcePrograms])
           setErrors({ ...errors, resourcePrograms: null });
@@ -189,7 +190,8 @@ function EditResource() {
     const newErrors = {};
     const phoneno = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
     const email = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    const site = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+    const site =
+      /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!resourceProvider || resourceProvider === '') {
       newErrors.resourceProvider = 'Required';
     }
@@ -205,7 +207,8 @@ function EditResource() {
     if (!resourceDescription || resourceDescription === '') {
       newErrors.resourceDescription = 'Required';
     } else if (resourceDescription.length > 250) {
-      newErrors.resourceDescription = 'Descriptions should be less than 250 characters.';
+      newErrors.resourceDescription =
+        'Descriptions should be less than 250 characters.';
     }
     if (resourcePrograms === [] || resourcePrograms.length === 0) {
       newErrors.resourcePrograms = 'You must select at least one program.';
@@ -214,9 +217,17 @@ function EditResource() {
       newErrors.resourceWebsite = 'Please enter a valid URL.';
     }
     if (resourceEmail !== '' && !email.test(resourceEmail)) {
-      newErrors.resourceEmail = 'Please enter a valid email.'
+      newErrors.resourceEmail = 'Please enter a valid email.';
     }
     return newErrors;
+  };
+
+  const over250 = () => {
+    if (characters.current > 250) {
+      return true;
+    } else {
+      return false;
+    }
   };
 
   const updateResource = () => {
@@ -247,7 +258,7 @@ function EditResource() {
       console.log(errors);
     } else {
       updateResource();
-    };
+    }
   };
 
   const handleDeleteResource = () => {
@@ -367,7 +378,9 @@ function EditResource() {
                     readOnly={readOnly}
                     value={resourceAddress}
                     isInvalid={errors.resourceAddress}
-                    onChange={(e) => onResourceChange('address', e.target.value)}
+                    onChange={(e) =>
+                      onResourceChange('address', e.target.value)
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.resourceAddress}
@@ -398,16 +411,15 @@ function EditResource() {
                     value={resourceWebsite}
                     readOnly={readOnly}
                     isInvalid={errors.resourceWebsite}
-                    onChange={(e) => onResourceChange('website', e.target.value)}
+                    onChange={(e) =>
+                      onResourceChange('website', e.target.value)
+                    }
                   />
                   <Form.Control.Feedback type="invalid">
                     {errors.resourceWebsite}
                   </Form.Control.Feedback>
                 </Form.Group>
-                <Form.Group
-                  className="mb-3"
-                  controlId="editResourceForm.email"
-                >
+                <Form.Group className="mb-3" controlId="editResourceForm.email">
                   <Form.Label>Email: </Form.Label>
                   <Form.Control
                     type="text"
@@ -432,11 +444,21 @@ function EditResource() {
                     placeholder={resource.description}
                     value={resourceDescription}
                     readOnly={readOnly}
-                    isInvalid={errors.resourcePhone}
+                    isInvalid={errors.resourceDescription}
                     onChange={(e) =>
                       onResourceChange('description', e.target.value)
                     }
                   />
+                  {over250() ? (
+                    <Form.Text
+                      className="text-danger"
+                      style={{ fontSize: '0.875em' }}
+                    >
+                      {characters.current}/250
+                    </Form.Text>
+                  ) : (
+                    <Form.Text muted>{characters.current}/250</Form.Text>
+                  )}
                   <Form.Control.Feedback type="invalid">
                     {errors.resourceDescription}
                   </Form.Control.Feedback>
@@ -529,7 +551,11 @@ function EditResource() {
               <Card.Footer>
                 {!readOnly ? (
                   <Card.Text>
-                    <Button type='submit' className="me-2" onClick={(e) => saveEdits(e)}>
+                    <Button
+                      type="submit"
+                      className="me-2"
+                      onClick={(e) => saveEdits(e)}
+                    >
                       Save Edits
                     </Button>
                     <Button variant="danger" onClick={() => cancelEdits()}>
@@ -561,8 +587,16 @@ function EditResource() {
         {searchLength.current === 0 ? (
           <>
             <h4>No Resources Found</h4>
-            <Link to='/admin/add-resource' state={{ selected: {} }} className='text-secondary fs-5'>Add New Resource</Link>
-            <Link to='/'  className='text-secondary fs-5'>Check Full Resource List</Link>
+            <Link
+              to="/admin/add-resource"
+              state={{ selected: {} }}
+              className="text-secondary fs-5"
+            >
+              Add New Resource
+            </Link>
+            <Link to="/" className="text-secondary fs-5">
+              Check Full Resource List
+            </Link>
           </>
         ) : null}
       </Row>
