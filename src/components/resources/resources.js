@@ -56,6 +56,16 @@ function Resources() {
   const popFilter = useRef('');
   let filteredArray = [];
 
+  // for character limit in share new resource form
+  const characters = useRef(0);
+  const over250 = () => {
+    if (characters.current > 250) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
   // methods for updating refs
   const updateSearchText = (value) => {
     searchText.current = value;
@@ -135,7 +145,8 @@ function Resources() {
         break;
       case 'email':
         setFormResourceEmail(value);
-        if(!errors[formResourceEmail]) setErrors({ ...errors, formResourceEmail: null })
+        if (!errors[formResourceEmail])
+          setErrors({ ...errors, formResourceEmail: null });
         break;
       case 'provider':
         setFormResourceProvider(value);
@@ -159,6 +170,7 @@ function Resources() {
         break;
       case 'description':
         setFormResourceDescription(value);
+        characters.current = value.length;
         if (!errors[formResourceDescription])
           setErrors({ ...errors, formResourceDescription: null });
         break;
@@ -171,7 +183,8 @@ function Resources() {
     const newErrors = {};
     const phoneno = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
     const email = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    const site = /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+    const site =
+      /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
     if (!formResourceIdentifier || formResourceIdentifier === '') {
       newErrors.formResourceIdentifier = 'Required';
     }
@@ -195,6 +208,9 @@ function Resources() {
     }
     if (!formResourceDescription || formResourceDescription === '') {
       newErrors.formResourceDescription = 'Required';
+    } else if (formResourceDescription.length > 250) {
+      newErrors.formResourceDescription =
+        'Descriptions must be less than 250 characters.';
     }
     return newErrors;
   };
@@ -418,7 +434,7 @@ function Resources() {
   return (
     <Fade in={open}>
       <Container className="resources print-container">
-        <h2 className='print-title'>Resources</h2>
+        <h2 className="print-title">Resources</h2>
         {displayFeaturedResourcesText ? (
           <Row className="no-print">
             <Col>
@@ -506,9 +522,13 @@ function Resources() {
             </Col>
           ))}
         </Row>
-        <Button variant='link' onClick={printResources} className="no-print ps-0 print-link">
+        <Button
+          variant="link"
+          onClick={printResources}
+          className="no-print ps-0 print-link"
+        >
           <h4 className="mb-0">
-            <i className="bi bi-printer-fill"></i>  Print Resource List
+            <i className="bi bi-printer-fill"></i> Print Resource List
           </h4>
         </Button>
         {/* Share a new resource */}
@@ -657,6 +677,16 @@ function Resources() {
                     onResourceFormChange('description', e.target.value)
                   }
                 />
+                {over250() ? (
+                  <Form.Text
+                    className="text-danger"
+                    style={{ fontSize: '0.875em' }}
+                  >
+                    {characters.current}/250
+                  </Form.Text>
+                ) : (
+                  <Form.Text muted>{characters.current}/250</Form.Text>
+                )}
                 <Form.Control.Feedback type="invalid">
                   {errors.formResourceDescription}
                 </Form.Control.Feedback>
@@ -719,7 +749,9 @@ function Resources() {
         </ToastContainer>
         {/* Resource List for Printing */}
         <Row className="print-list">
-          <h6 className='text-bg-light mt-0 mb-1'>Provided by hamblenresourceguide.org</h6>
+          <h6 className="text-bg-light mt-0 mb-1">
+            Provided by hamblenresourceguide.org
+          </h6>
           {filteredResources.map((r) => (
             <Col sm="6" lg="4" className="print-cards ps-1 pe-1">
               <PrintCards key={r.id} resource={r} />
