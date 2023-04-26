@@ -435,13 +435,27 @@ function Resources() {
     <Fade in={open}>
       <Container className="resources print-container">
         <h2 className="print-title">Resources</h2>
+        <Row className="opening-about no-print rounded p-2 m-1 shadow border border-secondary">
+          <p className="m-0">
+            The Hamblen Resource Guide is a database of community & nonprofit
+            organizations, social services, and other helpful resources for
+            Hamblen County, TN, residents. Browse, search, and filter the
+            resource list below. If you know of a resource you don't see on this
+            list,{' '}
+            <Button
+              variant="link"
+              className="text-white p-0"
+              onClick={handleShowNewResourceModal}
+            >
+              share it with us
+            </Button>
+            .
+          </p>
+        </Row>
         {displayFeaturedResourcesText ? (
-          <Row className="no-print">
+          <Row className="no-print pt-2">
             <Col>
               <h4>Featured Programs and Announcements</h4>
-              {/* <div className="bg-secondary bg-opacity-50 border border-2 border-secondary rounded mb-2 pt-3 ps-3 pe-3">
-                <p>{featuredResourcesText}</p>
-              </div> */}
               <Alert variant="secondary">{featuredResourcesText}</Alert>
             </Col>
           </Row>
@@ -615,6 +629,9 @@ function Resources() {
                     onResourceFormChange('address', e.target.value)
                   }
                 />
+                <Form.Text muted>
+                  Please include full address if known (City, State, ZIP)
+                </Form.Text>
                 <Form.Control.Feedback type="invalid">
                   {errors.formResourceAddress}
                 </Form.Control.Feedback>
@@ -643,6 +660,10 @@ function Resources() {
                     onResourceFormChange('website', e.target.value)
                   }
                 />
+                <Form.Text muted>
+                  Please include full URL if known (including http:// or
+                  https://)
+                </Form.Text>
                 <Form.Control.Feedback type="invalid">
                   {errors.formResourceWebsite}
                 </Form.Control.Feedback>
@@ -757,7 +778,6 @@ function Resources() {
               <PrintCards key={r.id} resource={r} />
             </Col>
           ))}
-          {/* <p className='print-title'>List provided from www.hamblenresourceguide.org</p> */}
         </Row>
       </Container>
     </Fade>

@@ -27,3 +27,8 @@
   .print-list {display: flex;}
   .print-title {color: black; margin-bottom: 6px;}
 }
+
+.opening-about {
+  background-color: #1C3445;
+  border-color: #1C3445;
+}
