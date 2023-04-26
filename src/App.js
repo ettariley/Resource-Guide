@@ -18,6 +18,9 @@ import AddResource from './components/admin/add-resource';
 import EditResource from './components/admin/edit-resource';
 import EditFeaturedResources from './components/admin/edit-featured-resources';
 import EditFeaturedEvents from './components/admin/edit-featured-events';
+import EditPopulations from './components/admin/edit-populations';
+import EditServices from './components/admin/edit-services';
+import EditTags from './components/admin/edit-tags';
 
 function App() {
   return (
@@ -44,6 +47,9 @@ function App() {
           <Route path="admin/edit-resource" element={<EditResource />} />
           <Route path="admin/edit-featured-resources" element={<EditFeaturedResources />} />
           <Route path="admin/edit-featured-events" element={<EditFeaturedEvents />} />
+          <Route path="admin/edit-population-filters" element={<EditPopulations />} />
+          <Route path="admin/edit-service-filters" element={<EditServices />} />
+          <Route path="admin/edit-event-tags" element={<EditTags />} />
           <Route path="/login" element={<Login />} />
         </Routes>
       </div>

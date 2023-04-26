@@ -60,6 +60,9 @@ function EditResource() {
   };
 
   const searchResources = () => {
+    // clear read only information in case a resource has already been loaded
+    cancelEdits();
+    // search for resource
     const resourcesQuery = query(
       resources,
       where('provider', '==', searchText.current),
@@ -99,6 +102,7 @@ function EditResource() {
     setResourceWebsite(resource.website);
     setResourceEmail(resource.email);
     setReadOnly(false);
+    console.log(resourceEmail);
   };
 
   const cancelEdits = () => {
@@ -190,8 +194,7 @@ function EditResource() {
     const newErrors = {};
     const phoneno = /^[0-9]{3}-[0-9]{3}-[0-9]{4}$/;
     const email = /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/;
-    const site =
-      /^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$/;
+    const site = /^(http|https):\/\/[^ "]+$/;
     if (!resourceProvider || resourceProvider === '') {
       newErrors.resourceProvider = 'Required';
     }
@@ -214,10 +217,13 @@ function EditResource() {
       newErrors.resourcePrograms = 'You must select at least one program.';
     }
     if (resourceWebsite !== '' && !site.test(resourceWebsite)) {
-      newErrors.resourceWebsite = 'Please enter a valid URL.';
+      newErrors.resourceWebsite =
+        'Please enter a valid URL (must include http:// or https://).';
     }
-    if (resourceEmail !== '' && !email.test(resourceEmail)) {
-      newErrors.resourceEmail = 'Please enter a valid email.';
+    if (resourceEmail && resourceEmail !== '') {
+      if (!email.test(resourceEmail)) {
+        newErrors.resourceEmail = 'Please enter a valid email.';
+      }
     }
     return newErrors;
   };

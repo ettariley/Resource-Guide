@@ -50,3 +50,16 @@
 .preview-cards:hover {
   border: #89b2ae;
 }
+
+.list-rows {
+  background-color: #1c3445;
+}
+
+.list-buttons {
+  background-color: hsla(205, 42%, 19%, 0) !important;
+  border-color: hsla(205, 42%, 19%, 0) !important;
+}
+
+.list-delete:hover {
+  color: white !important;
+}

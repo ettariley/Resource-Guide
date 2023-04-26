@@ -22,7 +22,14 @@ import AddEvent from './add-event';
 import EditEvent from './edit-event';
 import AddResource from './add-resource';
 import EditResource from './edit-resource';
-import { query, doc, getDoc, collection, where, getCountFromServer } from 'firebase/firestore';
+import {
+  query,
+  doc,
+  getDoc,
+  collection,
+  where,
+  getCountFromServer,
+} from 'firebase/firestore';
 import { db } from '../../firebase';
 
 function Admin() {
@@ -97,20 +104,32 @@ function Admin() {
   useEffect(() => {
     // edit resource requests
     const editRequests = collection(db, 'Edit-Requests');
-    const editRequestsUnreadQuery = query(editRequests, where('read', '==', false));
-    const editRequestsUnreadSnapshot = getCountFromServer(editRequestsUnreadQuery).then((editRequestsUnreadSnapshot) => {
+    const editRequestsUnreadQuery = query(
+      editRequests,
+      where('read', '==', false)
+    );
+    const editRequestsUnreadSnapshot = getCountFromServer(
+      editRequestsUnreadQuery
+    ).then((editRequestsUnreadSnapshot) => {
       setUnreadEditResource(editRequestsUnreadSnapshot.data().count);
     });
     // new resource requests
     const newResources = collection(db, 'Resource-Requests');
-    const newResourcesUnreadQuery = query(newResources, where('read', '==', false));
-    const newResourcesUnreadSnapshot = getCountFromServer(newResourcesUnreadQuery).then((newResourcesUnreadSnapshot) => {
+    const newResourcesUnreadQuery = query(
+      newResources,
+      where('read', '==', false)
+    );
+    const newResourcesUnreadSnapshot = getCountFromServer(
+      newResourcesUnreadQuery
+    ).then((newResourcesUnreadSnapshot) => {
       setUnreadNewResources(newResourcesUnreadSnapshot.data().count);
     });
     // edit resource requests
     const newEvents = collection(db, 'Event-Requests');
     const newEventsUnreadQuery = query(newEvents, where('read', '==', false));
-    const newEventsUnreadSnapshot = getCountFromServer(newEventsUnreadQuery).then((newEventsUnreadSnapshot) => {
+    const newEventsUnreadSnapshot = getCountFromServer(
+      newEventsUnreadQuery
+    ).then((newEventsUnreadSnapshot) => {
       setUnreadNewEvents(newEventsUnreadSnapshot.data().count);
     });
   }, []);
@@ -147,18 +166,20 @@ function Admin() {
         <h2>Admin Dashboard</h2>
         <Row xs={1} sm={2} lg={3} xl={4}>
           {/* form/request review pages DONE */}
-          <Col className='mb-4'>
+          <Col className="mb-4">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Requests</Card.Title>
                 <Card.Text>
                   <Button variant="secondary" as={Link} to="edit-requests">
-                    Resource Edit Requests <Badge pill>{unreadEditResource}</Badge>
+                    Resource Edit Requests{' '}
+                    <Badge pill>{unreadEditResource}</Badge>
                   </Button>
                 </Card.Text>
                 <Card.Text>
                   <Button variant="secondary" as={Link} to="resource-requests">
-                    New Resource Requests <Badge pill>{unreadNewResources}</Badge>
+                    New Resource Requests{' '}
+                    <Badge pill>{unreadNewResources}</Badge>
                   </Button>
                 </Card.Text>
                 <Card.Text>
@@ -170,35 +191,58 @@ function Admin() {
             </Card>
           </Col>
           {/* add and edit resources DONE */}
-          <Col className='mb-4'>
+          <Col className="mb-4">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Resources</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="add-resource" state={{ selected: {} }}>Add New Resource</Button>
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to="add-resource"
+                    state={{ selected: {} }}
+                  >
+                    Add New Resource
+                  </Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="edit-resource" state={{ selected: {} }}>Edit or Remove Resource</Button>
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to="edit-resource"
+                    state={{ selected: {} }}
+                  >
+                    Edit or Remove Resource
+                  </Button>
                 </Card.Text>
               </Card.Body>
             </Card>
           </Col>
           {/* add and edit events DONE */}
-          <Col className='mb-4'>
+          <Col className="mb-4">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Events</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="add-event" state={{ selected: {} }}>Add New Event</Button>
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to="add-event"
+                    state={{ selected: {} }}
+                  >
+                    Add New Event
+                  </Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="edit-event">Edit or Remove Event</Button>
+                  <Button variant="secondary" as={Link} to="edit-event">
+                    Edit or Remove Event
+                  </Button>
                 </Card.Text>
               </Card.Body>
             </Card>
           </Col>
           {/* edit about page info NOT STARTED */}
-          <Col className='mb-4 d-none'>
+          <Col className="mb-4 d-none">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>About Page</Card.Title>
@@ -212,17 +256,25 @@ function Admin() {
             </Card>
           </Col>
           {/* edit featured text DONE */}
-          <Col className='mb-4'>
+          <Col className="mb-4">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Featured text</Card.Title>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="edit-featured-resources">
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to="edit-featured-resources"
+                  >
                     Edit on Resources Page
                   </Button>
                 </Card.Text>
                 <Card.Text>
-                  <Button variant="secondary" as={Link} to="edit-featured-events">
+                  <Button
+                    variant="secondary"
+                    as={Link}
+                    to="edit-featured-events"
+                  >
                     Edit on Events Page
                   </Button>
                 </Card.Text>
@@ -230,31 +282,30 @@ function Admin() {
             </Card>
           </Col>
           {/* edit filters IN PROGRESS */}
-          <Col className='mb-4 d-none'>
+          <Col className="mb-4">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Filters</Card.Title>
                 <Card.Text>
                   <Button
                     variant="secondary"
-                    onClick={() => handleShowFilterModal('Populations')}
+                    as={Link}
+                    to="edit-population-filters"
                   >
                     Edit Population Filters
                   </Button>
                 </Card.Text>
                 <Card.Text>
-                  {/* <Button
-                    variant="secondary"
-                    onClick={() => displayList('Programs')}
-                  >
-                    Edit Program Filters
-                  </Button> */}
-                </Card.Text>
-                <Card.Text>
                   <Button
                     variant="secondary"
-                    onClick={() => handleShowFilterModal('Event Tags')}
+                    as={Link}
+                    to="edit-service-filters"
                   >
+                    Edit Service Filters
+                  </Button>
+                </Card.Text>
+                <Card.Text>
+                  <Button variant="secondary" as={Link} to="edit-event-tags">
                     Edit Event Tags
                   </Button>
                 </Card.Text>
@@ -262,7 +313,7 @@ function Admin() {
             </Card>
           </Col>
           {/* admin account edits NOT STARTED */}
-          <Col className='mb-4 d-none'>
+          <Col className="mb-4 d-none">
             <Card className="text-bg-light h-100">
               <Card.Body className="text-bg-light">
                 <Card.Title>Admin Settings</Card.Title>
