@@ -86,6 +86,7 @@ function Footer() {
           >
             <h5>Add Hamblen Resource Guide to your home screen</h5>
           </Button>
+          <Row></Row>
         </Col>
       </Row>
       <Overlay target={target.current} show={show} placement="top">
