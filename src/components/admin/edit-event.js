@@ -709,7 +709,7 @@ function EditEvent() {
                       placeholder={event.eventLink}
                       readOnly={readOnly}
                       value={eventLink}
-                      onChange={(e) => onEventChange('end', e.target.value)}
+                      onChange={(e) => onEventChange('link', e.target.value)}
                     />
                     <Form.Text muted>Optional</Form.Text>
                   </Form.Group>

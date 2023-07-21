@@ -471,7 +471,7 @@ function AddEvent() {
                 type="url"
                 name="newEventLink"
                 value={newEventLink}
-                onChange={(e) => onNewEventChange('end', e.target.value)}
+                onChange={(e) => onNewEventChange('link', e.target.value)}
               />
               <Form.Text muted>Optional</Form.Text>
             </Form.Group>
