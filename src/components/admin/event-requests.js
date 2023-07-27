@@ -406,8 +406,8 @@ function EventRequests() {
               <h5 className="pt-2">New Event: {selected.title}</h5>
               <p>Event Host: {selected.eventHost}</p>
               <p>Person Submitting is: {selected.identifier}</p>
-              <p>Start Time: {selected.start.toDateString()}</p>
-              <p>End Time: {selected.end.toDateString()}</p>
+              <p>Start Time: {selected.start.toLocaleString()}</p>
+              <p>End Time: {selected.end.toLocaleString()}</p>
               <p>Location: {selected.location}</p>
               <p>Description: {selected.description}</p>
               <p>Host Contact: {selected.hostPhone}</p>

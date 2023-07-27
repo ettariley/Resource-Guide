@@ -341,9 +341,9 @@ function AddEvent() {
           <Alert.Heading>New Event Request Information</Alert.Heading>
           Title: {selected.title}
           <br></br>
-          Event Start: {selected.start.toDateString()}
+          Event Start: {selected.start.toLocaleString()}
           <br></br>
-          Event End: {selected.end.toDateString()}
+          Event End: {selected.end.toLocaleString()}
           <br></br>
           Host: {selected.eventHost}
           <br></br>
