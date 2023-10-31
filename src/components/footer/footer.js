@@ -62,7 +62,7 @@ function Footer() {
             </Col>
           </Row>
           <h6 className="pt-1 pb-0">
-            Funded by grants from the East Tennessee Foundation & East Tennessee
+            Funded by grants from the East Tennessee Foundation Youth Endowment Fund & Tennessee Department of Health/East Tennessee
             State University.
           </h6>
         </Col>
